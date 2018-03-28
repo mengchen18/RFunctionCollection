@@ -63,7 +63,7 @@ findOutlier <- function(x, foldthresh = 5, logbase = c(10, 2, "e")[1], ...) {
   
   cc <- outlierThresh(x, ...)
   i3 <- sx[1, ] > cc  
-  i3[which(rowMins(x, na.rm = TRUE) > cc)] <- FALSE
+  i3[which(sx[2, ] > cc)] <- FALSE
   ii <- which(i3 & (i1 | i2))
   
   om <- x[ii, ]
