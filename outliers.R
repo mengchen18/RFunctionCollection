@@ -1,4 +1,8 @@
-# this file contains functions used in outlier analysis of an expression data
+# this file contains functions used in outlier analysis of an expression matrix
+# To load functions in this file into your R working space, run:
+# source("https://raw.githubusercontent.com/mengchen18/RFunctionCollection/master/outliers.R")
+
+
 #' @title identify reliable outlier cut
 #' @param x a log transformed matrix
 #' @param nbreaks the number of value used to check in the range of row max of x
@@ -43,6 +47,7 @@ outlierThresh <- function(x, nbreaks = 100, window = 0.05, pvalue = 0.05) {
 #' @param foldthresh
 #' @param logbase the base of log transformation
 #' @param ... other arguments passed to \code{outlierThresh}
+#' @importFrom matrixStats rowMins
 
 findOutlier <- function(x, foldthresh = 5, logbase = c(10, 2, "e")[1], ...) {
   
@@ -58,7 +63,7 @@ findOutlier <- function(x, foldthresh = 5, logbase = c(10, 2, "e")[1], ...) {
   
   cc <- outlierThresh(x, ...)
   i3 <- sx[1, ] > cc  
-  i3[which(sx[2, ] > cc)] <- FALSE
+  i3[which(rowMins(x, na.rm = TRUE) > cc)] <- FALSE
   ii <- which(i3 & (i1 | i2))
   
   om <- x[ii, ]
