@@ -27,11 +27,13 @@ outlierThresh <- function(x, nbreaks = 100, window = 0.05, pvalue = 0.05) {
     round(tb[as.character(max.na)]/sum(tb), digits = 2)
   })
   
-  layout(matrix(1:3, 1, 3))
+  le <- lowess(vec, rat, delta = 0.5, f = 1)
+  cut <- vec[which(le$y < pvalue)[1]]
   
-  cut <- vec[which(rat < pvalue)[1]]
+  layout(matrix(1:3, 1, 3))
   plot(vec, rat, xlab = "intensity", ylab = "empirical p value (# of non-missing = 1)")
   abline(h = pvalue, v = cut, col = "green", lwd = 2)
+  lines(le)
   
   hist(rmax, breaks = 50, main = 'Histogram of row max of x')
   abline(v = cut, col = "green", lwd = 2)
