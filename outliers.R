@@ -46,10 +46,12 @@ outlierThresh <- function(x, nbreaks = 100, window = 0.05, pvalue = 0.05) {
 #' @param x a log transformed matrix
 #' @param foldthresh
 #' @param logbase the base of log transformation
+#' @param reachLowBound logical. Whether the lowest intensity of a row should be lower than the threshould 
+#'  determined by \code{outlierThresh}
 #' @param ... other arguments passed to \code{outlierThresh}
 #' @importFrom matrixStats rowMins
 
-findOutlier <- function(x, foldthresh = 5, logbase = c(10, 2, "e")[1], ...) {
+findOutlier <- function(x, foldthresh = 5, logbase = c(10, 2, "e")[1], reachLowBound = TRUE, ...) {
   
   bd <- switch(logbase, 
                "10" = log10(foldthresh), 
@@ -63,7 +65,8 @@ findOutlier <- function(x, foldthresh = 5, logbase = c(10, 2, "e")[1], ...) {
   
   cc <- outlierThresh(x, ...)
   i3 <- sx[1, ] > cc  
-  i3[which(sx[2, ] > cc)] <- FALSE
+  if (reachLowBound)
+    i3[which(sx[2, ] > cc)] <- FALSE
   ii <- which(i3 & (i1 | i2))
   
   om <- x[ii, ]
