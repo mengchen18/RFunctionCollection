@@ -30,6 +30,9 @@ outlierThresh <- function(x, nbreaks = 100, window = 0.05, pvalue = 0.05) {
   le <- lowess(vec, rat, delta = 0.5, f = 1)
   cut <- vec[which(le$y < pvalue)[1]]
   
+  op <- par(no.readonly = TRUE)
+  on.exit(par(op))
+
   layout(matrix(1:3, 1, 3))
   plot(vec, rat, xlab = "intensity", ylab = "empirical p value (# of non-missing = 1)")
   abline(h = pvalue, v = cut, col = "green", lwd = 2)
@@ -72,8 +75,9 @@ findOutlier <- function(x, foldthresh = 5, logbase = c(10, 2, "e")[1], reachLowB
   ii <- which(i3 & (i1 | i2))
   
   om <- x[ii, ]
+  rmax <- rowMaxs(om, na.rm = TRUE)
   ct <- lapply(1:ncol(om), function(p) {
-    ii[which(om[, p] > rowMaxs(om[, -p], na.rm = TRUE))]
+    ii[which(om[, p] == rmax)]
   })
   names(ct) <- colnames(x)
   list(outlierIndex = ii, outlierMatrix = om, outlierIndexColumns = ct)

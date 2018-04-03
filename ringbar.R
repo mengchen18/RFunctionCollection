@@ -1,0 +1,50 @@
+#' @title barplot of matrix in ring
+#' @param x a matrix, top row is for outer ring
+#' @param col a matrix has the same dimension as \code{x} to indicate the color of bars
+#' @param gap.degree degree of gap
+#' @param start.degree start degree of rings
+#' @param y.axis logical; whether the y axis should be drawn
+#' @param x.axis.inner logical; whether the x axis of the inner ring should be drawn
+#' @param x.axis logical; whether the x axis of the rings should be drawn
+#' @import circlize
+#' @examples 
+#'  x <- matrix(rnorm(600), nrow = 6)
+#'  col <- row(x)
+#'  ringbar(x)
+
+ringbar <- function(x, gap.degree = 40, start.degree = 90, y.axis = TRUE, x.axis.inner = TRUE, x.axis = FALSE) {
+
+  n <- ncol(x)
+  
+  circos.clear()
+  circos.par(gap.degree = gap.degree, start.degree = start.degree)
+  circos.initialize(factors = factor(rep("x", n+1)), x = 0:n) #
+  
+  for (i in 1:nrow(x)) {
+    x1 <- x[i, ]
+    col1 <- col[i,]
+    
+    bot <- min(x1, na.rm = TRUE)
+    top <- max(x1, na.rm = TRUE)
+    circos.trackPlotRegion(ylim = c(bot, top), 
+                           track.margin = c(0.01, 0.01),
+                           cell.padding = c(0,0,0,0), 
+                           track.height = 0.1, 
+                           bg.border  = FALSE)
+    circos.rect(1:n-1, ybottom = rep(bot, n), 1:n, x1, col = col1, border = "white")
+    if (y.axis)
+      circos.yaxis(side = "left", labels.niceFacing = T, labels.cex = 0.3)
+    
+    if (x.axis)
+      circos.axis(h = "bottom", major.at = 1:n-0.5, labels = "", labels.cex = 0.5,
+                  minor.ticks = 0, major.tick = FALSE, direction = "inside", 
+                  labels.facing = "reverse.clockwise")
+    
+  }
+  if (x.axis.inner)
+    circos.axis(h = "bottom", major.at = 1:n-0.5, labels = "", labels.cex = 0.5,
+                minor.ticks = 0, major.tick = FALSE, direction = "inside", 
+                labels.facing = "reverse.clockwise")
+  
+}
+
