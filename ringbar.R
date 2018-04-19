@@ -6,15 +6,23 @@
 #' @param y.axis logical; whether the y axis should be drawn
 #' @param x.axis.inner logical; whether the x axis of the inner ring should be drawn
 #' @param x.axis logical; whether the x axis of the rings should be drawn
+#' @param track.margin.exp the expansion factor of track.margin
+#' @param track.height passed to \code{circos.trackPlotRegion}
 #' @import circlize
 #' @examples 
 #'  x <- matrix(rnorm(600), nrow = 6)
 #'  col <- row(x)
 #'  ringbar(x)
 
-ringbar <- function(x, gap.degree = 40, start.degree = 90, y.axis = TRUE, x.axis.inner = TRUE, x.axis = FALSE) {
+ringbar <- function(x, col = 1, gap.degree = 40, start.degree = 90, track.margin.exp = 1, 
+  y.axis = TRUE, x.axis.inner = TRUE, x.axis = FALSE, track.height = 0.1) {
 
   n <- ncol(x)
+  if (length(col) == 1)
+    col <- matrix(col, nrow(x), ncol(x))
+
+  if (any(dim(x) != dim(col)))
+    stop("The dimension of color should be the same as x.")
   
   circos.clear()
   circos.par(gap.degree = gap.degree, start.degree = start.degree)
@@ -26,10 +34,15 @@ ringbar <- function(x, gap.degree = 40, start.degree = 90, y.axis = TRUE, x.axis
     
     bot <- min(x1, na.rm = TRUE)
     top <- max(x1, na.rm = TRUE)
+    if (bot == top) {
+      bot <- bot - 0.05*bot
+      top <- top + 0.01*top
+    }
+
     circos.trackPlotRegion(ylim = c(bot, top), 
-                           track.margin = c(0.01, 0.01),
+                           track.margin = c(0.01, 0.01)*track.margin.exp,
                            cell.padding = c(0,0,0,0), 
-                           track.height = 0.1, 
+                           track.height = track.height, 
                            bg.border  = FALSE)
     circos.rect(1:n-1, ybottom = rep(bot, n), 1:n, x1, col = col1, border = "white")
     if (y.axis)
