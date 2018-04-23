@@ -25,6 +25,7 @@ ringbar <- function(x, col = 1, gap.degree = 40, start.degree = 90, track.margin
     stop("The dimension of color should be the same as x.")
   
   circos.clear()
+  par(mar = c(0.1, 0.1, 0.1, 0.1))
   circos.par(gap.degree = gap.degree, start.degree = start.degree)
   circos.initialize(factors = factor(rep("x", n+1)), x = 0:n) #
   
