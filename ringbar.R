@@ -32,12 +32,8 @@ ringbar <- function(x, col = 1, gap.degree = 40, start.degree = 90, track.margin
     x1 <- x[i, ]
     col1 <- col[i,]
     
-    bot <- min(x1, na.rm = TRUE)
-    top <- max(x1, na.rm = TRUE)
-    if (bot == top) {
-      bot <- bot - 0.05*bot
-      top <- top + 0.01*top
-    }
+    bot <- 0.95 * min(x1, na.rm = TRUE)
+    top <- 1.01 * max(x1, na.rm = TRUE)
 
     circos.trackPlotRegion(ylim = c(bot, top), 
                            track.margin = c(0.01, 0.01)*track.margin.exp,
@@ -46,11 +42,13 @@ ringbar <- function(x, col = 1, gap.degree = 40, start.degree = 90, track.margin
                            bg.border  = FALSE)
     circos.rect(1:n-1, ybottom = rep(bot, n), 1:n, x1, col = col1, border = "white")
     if (y.axis)
-      circos.yaxis(side = "left", labels.niceFacing = T, labels.cex = 0.3)
+      circos.yaxis(side = "left", labels.niceFacing = T, 
+        tick.length = convert_x(0.1, "mm", get.cell.meta.data("sector.index"), get.cell.meta.data("track.index")), 
+        labels.cex = 0.3, at = round(max(x1, na.rm = TRUE), digits = 2))
     
     if (x.axis)
       circos.axis(h = "bottom", major.at = 1:n-0.5, labels = "", labels.cex = 0.5,
-                  minor.ticks = 0, major.tick = FALSE, direction = "inside", 
+                  minor.ticks = 0, major.tick = FALSE, direction = "inside", col = "gray",
                   labels.facing = "reverse.clockwise")
     
   }
