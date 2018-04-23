@@ -47,7 +47,7 @@ ringbar <- function(x, col = 1, gap.degree = 40, start.degree = 90, track.margin
         labels.cex = 0.3, at = round(max(x1, na.rm = TRUE), digits = 2))
     
     if (x.axis)
-      circos.axis(h = "bottom", major.at = 1:n-0.5, labels = "", labels.cex = 0.5,
+      circos.axis(h = "bottom", major.at = 1:n-0.5, labels = "", labels.cex = 0.5, lwd = 0.5,
                   minor.ticks = 0, major.tick = FALSE, direction = "inside", col = "gray",
                   labels.facing = "reverse.clockwise")
     
