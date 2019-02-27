@@ -42,7 +42,8 @@ basicMQC <- function(x, cols, pheno) {
   # boxplot
   logemat <- apply(emat, 2, log10)
   logemat[is.infinite(logemat)] <- NA
-  boxplot(logemat, ylab = "Intensity (log10)", col = pal[as.character(pheno)])
+  boxplot(logemat, ylab = "Intensity (log10)", col = pal[as.character(pheno)], 
+          las = 2)
   
   # pca 
   logemat[is.na(logemat)] <- min(logemat, na.rm = TRUE) - log10(2)
@@ -50,8 +51,7 @@ basicMQC <- function(x, cols, pheno) {
   vars <- signif(pc$sdev^2/sum(pc$sdev^2), 3)
   plot(pc$x[, 1:2], col = pal[as.character(pheno)], pch = 19, cex = 2, 
        xlab = paste0("PC1 (", vars[1]*100, "%)"),
-       ylab = paste0("PC2 (", vars[2]*100, "%)"), 
-       las = 2
+       ylab = paste0("PC2 (", vars[2]*100, "%)")
   )
   
 }
