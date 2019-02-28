@@ -30,17 +30,17 @@ basicMQC <- function(x, cols, pheno, xmpg = TRUE, log = TRUE) {
       emat <- x[, cols]
       colnames(emat) <- gsub("LFQ.intensity.|iBAQ.|Intensity.", "", colnames(emat))
       emat <- apply(emat[i, ], 2, as.numeric)
-      emat[is.na(emat)] <- 0
   } else
       emat <- apply(x, 2, as.numeric)
   emat[is.infinite(emat)] <- NA
-  # id plot
-  layout(matrix(1:3, 3, 1))
   
-  bp <- barplot(colSums(emat > 0, na.rm = TRUE), col = pal[as.character(pheno)], 
+  layout(matrix(1:3, 3, 1))
+  # id plot
+  idmat <- apply(!is.na(emat), 2, as.integer)
+  bp <- barplot(colSums(idmat, na.rm = TRUE), col = pal[as.character(pheno)], 
                 las = 2, ylim = ceiling(c(0, nrow(emat)*1.05)), ylab = "# protein IDs")
-  lines(bp, colSums(rowCumsums(emat) > 0), col = 1)
-  points(bp, colSums(rowCumsums(emat) > 0), col = 1, pch = 19)
+  lines(bp, colSums(rowCumsums(idmat) > 0), col = 1)
+  points(bp, colSums(rowCumsums(idmat) > 0), col = 1, pch = 19)
   legend("topleft", col = pal, pch = 15, legend = levels(pheno), bty = "n", pt.cex = 2)
   
   # boxplot
