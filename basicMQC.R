@@ -33,7 +33,7 @@ basicMQC <- function(x, cols, pheno, xmpg = TRUE, log = TRUE) {
       emat[is.na(emat)] <- 0
   } else
       emat <- apply(x, 2, as.numeric)
-  
+  emat[is.infinite(emat)] <- NA
   # id plot
   layout(matrix(1:3, 3, 1))
   
