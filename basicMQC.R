@@ -7,6 +7,7 @@
 #' @param log whether x should be log transformed
 #' @import matrixStats
 #' @import randomcoloR
+
 basicMQC <- function(x, cols, pheno, xmpg = TRUE, log = TRUE) {
   
   require(matrixStats)
@@ -14,13 +15,13 @@ basicMQC <- function(x, cols, pheno, xmpg = TRUE, log = TRUE) {
   
   ord <- order(pheno)
   pheno <- pheno[ord]
-  cols <- cols[ord]
   
   pheno <- as.factor(pheno)
   n <- nlevels(pheno)
   pal <- structure(distinctColorPalette(n), names = levels(pheno))
   
   if (xmpg) {
+      cols <- cols[ord]
       i1 <- grepl("^CON", x$Majority.protein.IDs)
       i2 <- grepl("^REV", x$Majority.protein.IDs)
       i3 <- x$Only.identified.by.site == "+"
