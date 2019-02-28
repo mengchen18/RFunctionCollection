@@ -4,9 +4,10 @@
 #' @param cols the columns to be included in the QC, usually the intensity, iBAQ or LFQ columns
 #' @param pheno the pheno type vector, should be the same length as cols
 #' @param xmpq whether x is an maxquant protein group input
+#' @param log whether x should be log transformed
 #' @import matrixStats
 #' @import randomcoloR
-basicMQC <- function(x, cols, pheno, xmpg = TRUE) {
+basicMQC <- function(x, cols, pheno, xmpg = TRUE, log = TRUE) {
   
   require(matrixStats)
   require(randomcoloR)
@@ -28,9 +29,9 @@ basicMQC <- function(x, cols, pheno, xmpg = TRUE) {
       emat <- x[, cols]
       colnames(emat) <- gsub("LFQ.intensity.|iBAQ.|Intensity.", "", colnames(emat))
       emat <- apply(emat[i, ], 2, as.numeric)
+      emat[is.na(emat)] <- 0
   } else
-    emat <- x
-  emat[is.na(emat)] <- 0
+      emat <- apply(x, 2, as.numeric)
   
   # id plot
   layout(matrix(1:3, 3, 1))
@@ -42,7 +43,9 @@ basicMQC <- function(x, cols, pheno, xmpg = TRUE) {
   legend("topleft", col = pal, pch = 15, legend = levels(pheno), bty = "n", pt.cex = 2)
   
   # boxplot
-  logemat <- apply(emat, 2, log10)
+  if (log)
+    logemat <- apply(emat, 2, log10) else
+      logmat <- emat
   logemat[is.infinite(logemat)] <- NA
   boxplot(logemat, ylab = "Intensity (log10)", col = pal[as.character(pheno)], 
           las = 2)
