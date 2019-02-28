@@ -45,7 +45,7 @@ basicMQC <- function(x, cols, pheno, xmpg = TRUE, log = TRUE) {
   # boxplot
   if (log)
     logemat <- apply(emat, 2, log10) else
-      logmat <- emat
+      logemat <- emat
   logemat[is.infinite(logemat)] <- NA
   boxplot(logemat, ylab = "Intensity (log10)", col = pal[as.character(pheno)], 
           las = 2)
