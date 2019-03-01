@@ -18,7 +18,7 @@ basicMQC <- function(x, cols, pheno, xmpg = TRUE, log = TRUE) {
   
   pheno <- as.factor(pheno)
   n <- nlevels(pheno)
-  pal <- structure(distinctColorPalette(n), names = levels(pheno))
+  pal <- structure(sort(distinctColorPalette(n)), names = levels(pheno))
   
   if (xmpg) {
       cols <- cols[ord]
