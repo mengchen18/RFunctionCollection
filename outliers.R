@@ -16,9 +16,7 @@ outlierThresh <- function(x, nbreaks = 100, window = 0.05, pvalue = 0.05) {
   nna <- as.factor(nna)
   rmax <- rowMaxs(x, na.rm = TRUE)
   rmax[is.infinite(rmax)] <- NA
-  mi <- min(rmax, na.rm = TRUE)
-  ma <- max(rmax, na.rm = TRUE)
-  vec <- seq(mi, ma, length.out = nbreaks)
+  vec <- rmax
   
   max.na <- ncol(x) - 1
   rat <- sapply(vec, function(v) {
@@ -27,7 +25,14 @@ outlierThresh <- function(x, nbreaks = 100, window = 0.05, pvalue = 0.05) {
     round(tb[as.character(max.na)]/sum(tb), digits = 2)
   })
   
-  le <- lowess(vec, rat, delta = 0.5, f = 1)
+  ord <- order(vec, decreasing = FALSE)
+  vec <- vec[ord]
+  rat <- rat[ord]
+  ratcm <- rev(cummax(rev(rat)))
+  rat[ratcm - rat > 0.1] <- ratcm[ratcm - rat > 0.1]
+  
+  
+  le <- lowess(vec, rat, f = 0.1)
   cut <- vec[which(le$y < pvalue)[1]]
   
   op <- par(no.readonly = TRUE)
