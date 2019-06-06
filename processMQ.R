@@ -93,6 +93,7 @@ read.proteinGroups <- function(file) {
     }
     if (!is.null(keep.row))
       val <- val[keep.row, ]
+    colnames(val) <- gsub(type, "", colnames(val))
     val
   }
   
