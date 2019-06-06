@@ -70,7 +70,7 @@ basicMQC <- function(x, cols, pheno, xmpg = TRUE, log = TRUE) {
 read.proteinGroups <- function(file) {
   pg <- read.delim(file)
   df <- data.frame(val = c("iBAQ.",
-                           "LFQ.", 
+                           "LFQ.intensity.", 
                            "Peptides.", 
                            "Razor...unique.peptides.",
                            "Unique.peptides.",
