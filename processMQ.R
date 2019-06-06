@@ -148,6 +148,51 @@ multi.t.test <- function(x, label, compare = NULL) {
   do.call(cbind, lc)
 }
 
+#' @title Basic QC for MQ output, used after calling "read.proteinGroups"
+#' @description basic QC, including barplot for IDs, boxplot and PCA
+#' @param x the input matrix, usually a proteingroups table from maxquant
+#' @param group the group type vector, should be the same length as cols
+#' @import matrixStats
+#' @import randomcoloR
+
+plotQC <- function(x, group) {
+  
+  require(matrixStats)
+  require(randomcoloR)
+  
+  ord <- order(group)
+  group <- group[ord]
+  
+  group <- as.factor(group)
+  n <- nlevels(group)
+  pal <- structure(sort(distinctColorPalette(n)), names = levels(group))
+  emat <- x[, ord]
+  
+  layout(matrix(1:3, 3, 1))
+  # id plot
+  idmat <- apply(!is.na(emat), 2, as.integer)
+  bp <- barplot(colSums(idmat, na.rm = TRUE), col = pal[as.character(group)], 
+                las = 2, ylim = ceiling(c(0, nrow(emat)*1.05)), ylab = "# protein IDs")
+  lines(bp, colSums(rowCumsums(idmat) > 0), col = 1)
+  points(bp, colSums(rowCumsums(idmat) > 0), col = 1, pch = 19)
+  legend("topleft", col = pal, pch = 15, legend = levels(group), bty = "n", pt.cex = 2)
+  
+  # boxplot
+  logemat <- emat
+  logemat[is.infinite(logemat)] <- NA
+  boxplot(logemat, ylab = "Intensity (log10)", col = pal[as.character(group)], 
+          las = 2)
+  
+  # pca 
+  logemat[is.na(logemat)] <- min(logemat, na.rm = TRUE) - log10(2)
+  pc <- prcomp(t(logemat))
+  vars <- signif(pc$sdev^2/sum(pc$sdev^2), 3)
+  plot(pc$x[, 1:2], col = pal[as.character(group)], pch = 19, cex = 2, 
+       xlab = paste0("PC1 (", vars[1]*100, "%)"),
+       ylab = paste0("PC2 (", vars[2]*100, "%)")
+  )
+  
+}
 
 
 
