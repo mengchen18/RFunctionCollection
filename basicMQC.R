@@ -61,3 +61,94 @@ basicMQC <- function(x, cols, pheno, xmpg = TRUE, log = TRUE) {
   )
   
 }
+
+
+#' Read protein groups output of maxquant output and split
+#'   it to columns
+#' @param file Maxquant proteinGroup.txt file path
+
+read.proteinGroups <- function(file) {
+  pg <- read.delim(file)
+  df <- data.frame(val = c("iBAQ.",
+                           "LFQ.", 
+                           "Peptides.", 
+                           "Razor...unique.peptides.",
+                           "Unique.peptides.",
+                           "Sequence.coverage.",
+                           "Intensity.",
+                           "MS.MS.Count."), 
+                   log = c(T, T, F, F, F, F, F, F))
+  
+  i <- ! (grepl("^REV_", pg$Majority.protein.IDs) |
+    grepl("^CON_", pg$Majority.protein.IDs) |
+    pg$Only.identified.by.site == "+")
+  
+  annot <- pg[i, -grep(paste(df$val, collapse = "|"), colnames(pg))]
+  
+  getExpr <- function(x, type = "iBAQ.", log = TRUE, keep.row = NULL) {
+    val <- apply(pg[, grep(type, colnames(x))], 2, as.numeric)
+    if (log) {
+      val <- log10(val)
+      val[is.infinite(val)] <- NA
+    }
+    if (!is.null(keep.row))
+      val <- val[keep.row, ]
+    val
+  }
+  
+  ml <- mapply(function(val, log) getExpr(pg, type = val, log = log, keep.row = i), 
+               val = df$val, log = df$log)
+  names(ml) <- gsub("\\.$", "", df$val)
+  
+  ml$iBAQ_mc <- sweep(ml$iBAQ, 2, colMedians(ml$iBAQ, na.rm = TRUE), "-") + median(ml$iBAQ, na.rm = TRUE)
+  
+  ml$annot <- annot
+  ml
+}
+
+
+#' Do multiple t-test comparisons
+#'   it to columns
+#' @param file x expression matrix to be tested
+#' @param label the label of columns
+#' @compare the comparison to be done, a list of length-2 character vectors
+#'   to indicate which groups should be compared
+
+multi.t.test <- function(x, label, compare = NULL) {
+  if (!is.list(compare))
+    compare <- list(compare)
+  
+  lc <- lapply(compare, function(c1) {
+    if (length(c1) == 2) {
+      tv <- apply(x, 1, function(xx) {
+        t <- try(t.test(xx[label == c1[1]], xx[label == c1[2]]), silent = TRUE)
+        if (class(t) != "htest")
+          return(c(md = NA, tstat = NA, pval = NA, df = NA))
+        c(md = t$estimate[1] - t$estimate[2],
+          tstat = t$statistic[["t"]], 
+          pval = t$p.value,
+          df = t$parameter[["df"]])
+      })
+      tv <- data.frame(
+        md = as.numeric(tv[1, ]),
+        df = as.numeric(tv[4, ]),
+        tstat = as.numeric(tv[2, ]),
+        pval = as.numeric(tv[3, ]),
+        fdr = NA
+      )
+      tv$fdr[!is.na(tv$pval)] <- p.adjust(tv$pval[!is.na(tv$pval)], method = "fdr")
+      
+    } else {
+      warning("Only allow comparing two groups, ignored.")
+      tv <- NULL
+    }
+    tv
+  })
+  names(lc) <- sapply(compare, paste, collapse = "_")
+  do.call(cbind, lc)
+}
+
+
+
+
+
