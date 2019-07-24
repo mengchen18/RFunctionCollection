@@ -7,15 +7,19 @@
 #' @importFrom matrixStats rowMeans
 
 rowshift <- function(x, batch, ref=NULL) {
+  
   if (is.data.frame(x))
     x <- apply(x, 2, as.numeric)
+  if (is.null(ref))
+    ref <- 1:ncol(x)
   
   b_ref <- batch[ref]
-  expr_ref <- x[, ref]
+  expr_ref <- x[, ref, drop=FALSE]
   grandmeans <- rowMeans(expr_ref, na.rm = TRUE)
   for (i in unique(batch)) {
     off <- rowMeans(expr_ref[, b_ref == i], na.rm = TRUE) - grandmeans
     x[, batch == i] <- x[, batch == i] - off
   }
   x
+  
 }
