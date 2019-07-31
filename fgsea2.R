@@ -276,7 +276,7 @@ fgsea2 <- function(pathways, stats, nperm,
 
     # Makes pvals object printable immediatly
     pvals <- pvals[]
-
+    pvals$leadingEdge <- sapply(pvals$leadingEdge, paste, collapse = ";")
     pvals
 }
 
