@@ -172,10 +172,16 @@ plotQC <- function(x, group) {
   layout(matrix(1:3, 3, 1))
   # id plot
   idmat <- apply(!is.na(emat), 2, as.integer)
+  idna <- idmat
+  idna[idna == 0] <- NA
+  shareid <- colSums(!is.na(rowCumsums(idna)))
+  
   bp <- barplot(colSums(idmat, na.rm = TRUE), col = pal[as.character(group)], 
                 las = 2, ylim = ceiling(c(0, nrow(emat)*1.05)), ylab = "# protein IDs")
   lines(bp, colSums(rowCumsums(idmat) > 0), col = 1)
   points(bp, colSums(rowCumsums(idmat) > 0), col = 1, pch = 19)
+  lines(bp, shareid, col = 1, lty = 2)
+  points(bp, shareid, col = 1, pch = 15)
   legend("topleft", col = pal, pch = 15, legend = levels(group), bty = "n", pt.cex = 2)
   
   # boxplot
