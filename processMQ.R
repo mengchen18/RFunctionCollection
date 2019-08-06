@@ -112,17 +112,18 @@ read.proteinGroups <- function(file) {
 #'   it to columns
 #' @param file x expression matrix to be tested
 #' @param label the label of columns
-#' @compare the comparison to be done, a list of length-2 character vectors
+#' @param compare the comparison to be done, a list of length-2 character vectors
 #'   to indicate which groups should be compared
+#' @param ... other parameters passed to the t.test function
 
-multi.t.test <- function(x, label, compare = NULL) {
+multi.t.test <- function(x, label, compare = NULL, ...) {
   if (!is.list(compare))
     compare <- list(compare)
   
   lc <- lapply(compare, function(c1) {
     if (length(c1) == 2) {
       tv <- apply(x, 1, function(xx) {
-        t <- try(t.test(xx[label == c1[1]], xx[label == c1[2]]), silent = TRUE)
+        t <- try(t.test(xx[label == c1[1]], xx[label == c1[2]], ...), silent = TRUE)
         if (class(t) != "htest")
           return(c(md = NA, tstat = NA, pval = NA, df = NA))
         c(md = t$estimate[1] - t$estimate[2],
