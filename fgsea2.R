@@ -113,6 +113,7 @@ fgsea2 <- function(pathways, stats, nperm,
         stop("stats has to be a named vector")
     i <- is.na(stats)
     if (any(i)) {
+	    message(paste(sum(i), "NA values were excluded from stats!"))
 	stats <- stats[!i]
 	statsAnnot <- statsAnnot[!i]
     }
