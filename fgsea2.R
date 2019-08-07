@@ -108,7 +108,15 @@ fgsea2 <- function(pathways, stats, nperm,
                    nproc=0,
                    gseaParam=1,
                    BPPARAM=NULL) {
-
+    # check and stop
+    if (is.null(names(stats)))
+        stop("stats has to be a named vector")
+    i <- is.na(stats)
+    if (any(i)) {
+	stats <- stats[!i]
+	statsAnnot <- statsAnnot[!i]
+    }
+	
     # Warning message for ties in stats
     ties <- sum(duplicated(stats[stats != 0]))
     if (ties != 0) {
