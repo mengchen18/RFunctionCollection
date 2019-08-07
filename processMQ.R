@@ -216,8 +216,7 @@ multi.t.test <- function(x, label, compare = NULL, xlsx.file = NULL, other.sheet
     writeData(wb, sheet = "Intensity", x = x)
     saveWorkbook(wb, xlsx.file, overwrite = TRUE)
   }
-  
-  do.call(cbind, lc)
+  lc
 }
 
 
