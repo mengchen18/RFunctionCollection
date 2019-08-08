@@ -144,7 +144,7 @@ multi.t.test <- function(x, label, compare = NULL, xlsx.file = NULL, other.sheet
       nom2 <- na.omit(df$m2)
       df$q1[!is.na(df$m1)] <- rank(nom1)/length(nom1)
       df$q2[!is.na(df$m2)] <- rank(nom2)/length(nom2)
-      df$dm <- m1 - m2
+      df$md <- m1 - m2
       
       tv <- apply(x, 1, function(xx) {
         t <- try(t.test(xx[label == c1[1]], xx[label == c1[2]], ...), silent = TRUE)
