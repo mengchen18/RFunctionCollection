@@ -144,22 +144,21 @@ multi.t.test <- function(x, label, compare = NULL, xlsx.file = NULL, other.sheet
       nom2 <- na.omit(df$m2)
       df$q1[!is.na(df$m1)] <- rank(nom1)/length(nom1)
       df$q2[!is.na(df$m2)] <- rank(nom2)/length(nom2)
+      df$dm <- m1 - m2
       
       tv <- apply(x, 1, function(xx) {
         t <- try(t.test(xx[label == c1[1]], xx[label == c1[2]], ...), silent = TRUE)
         if (class(t) != "htest")
-          return(c(md = NA, tstat = NA, pval = NA, df = NA))
+          return(c(tstat = NA, pval = NA, df = NA))
         
-        c(md = t$estimate[1] - t$estimate[2],
-          tstat = t$statistic[["t"]], 
+        c(tstat = t$statistic[["t"]], 
           pval = t$p.value,
           df = t$parameter[["df"]])
       })
       tv <- data.frame(
-        md = as.numeric(tv[1, ]),
-        df = as.numeric(tv[4, ]),
-        tstat = as.numeric(tv[2, ]),
-        pval = as.numeric(tv[3, ]),
+        df = as.numeric(tv[3, ]),
+        tstat = as.numeric(tv[1, ]),
+        pval = as.numeric(tv[2, ]),
         fdr = NA
       )
       tv <- cbind(df, tv)
