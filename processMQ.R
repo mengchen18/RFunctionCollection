@@ -42,6 +42,36 @@ read.proteinGroups <- function(file) {
   ml
 }
 
+read.proteinGroups.tmt <- function(file) {
+  ab <- read.delim(file, stringsAsFactors = FALSE)
+  
+  ir <- c(grep("^CON_", ab$Majority.protein.IDs), 
+         grep("^REV_", ab$Majority.protein.IDs), 
+         which(ab$Only.identified.by.site == "+"))
+  
+  eSum <- c("Fraction", "Reporter.intensity.corrected", "Reporter.intensity", "Reporter.intensity.count")
+  ls <- list()
+  for (i in eSum) {
+    gb <- grep(paste0(i, ".[0-9]*$"), colnames(ab), value = TRUE)
+    ls[[i]] <- apply(ab[-ir, gb], 2, as.numeric)
+    ab[gb] <- NULL
+  }
+  
+  lsind <- list()
+  eInd <- c("Reporter.intensity.corrected", "Reporter.intensity.count", "Reporter.intensity")
+  for (i in eInd) {
+    gb <- grep(i, colnames(ab), value = TRUE)
+    lsind[[i]] <- apply(ab[-ir, gb], 2, as.numeric)
+    ab[gb] <- NULL
+  }
+  
+  lsind$Reporter.intensity.corrected.log2 <- log2(lsind$Reporter.intensity.corrected)
+  lsind$Reporter.intensity.corrected.log2[is.infinite(lsind$Reporter.intensity.corrected.log2)] <- NA
+  lsind$annot <- ab
+  lsind$Summed <- ls
+  
+  lsind
+}
 
 #' Do multiple t-test comparisons
 #'   it to columns
