@@ -67,7 +67,7 @@ read.proteinGroups.tmt <- function(file) {
   
   lsind$Reporter.intensity.corrected.log2 <- log2(lsind$Reporter.intensity.corrected)
   lsind$Reporter.intensity.corrected.log2[is.infinite(lsind$Reporter.intensity.corrected.log2)] <- NA
-  lsind$annot <- ab[-i, ]
+  lsind$annot <- ab[-ir, ]
   lsind$Summed <- ls
   
   lsind
