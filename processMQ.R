@@ -191,7 +191,7 @@ multi.t.test <- function(x, label, compare = NULL, xlsx.file = NULL, other.sheet
 #' @import matrixStats
 #' @import randomcoloR
 
-plotQC <- function(x, group) {
+plotQC <- function(x, group, labelPCA = FALSE) {
   
   require(matrixStats)
   require(randomcoloR)
@@ -233,6 +233,8 @@ plotQC <- function(x, group) {
        xlab = paste0("PC1 (", vars[1]*100, "%)"),
        ylab = paste0("PC2 (", vars[2]*100, "%)")
   )
+  if (labelPCA)
+    text(pc$x[, 1:2], labels = as.character(group))
   
 }
 
