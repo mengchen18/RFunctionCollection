@@ -198,7 +198,7 @@ multi.t.test <- function(x, label, compare = NULL, xlsx.file = NULL, other.sheet
 #' @import matrixStats
 #' @import randomcoloR
 
-plotQC <- function(x, group, labelPCA = FALSE, fillNA = TRUE) {
+plotQC <- function(x, group, labelPCA = FALSE, fillNA = TRUE, checkPC = 1:2) {
   
   require(matrixStats)
   require(randomcoloR)
@@ -239,10 +239,10 @@ plotQC <- function(x, group, labelPCA = FALSE, fillNA = TRUE) {
   
   pc <- prcomp(t(logemat))
   vars <- signif(pc$sdev^2/sum(pc$sdev^2), 3)
-  plot(pc$x[, 1:2], col = pal[as.character(group)], pch = 19, cex = 2, 
+  plot(pc$x[, checkPC], col = pal[as.character(group)], pch = 19, cex = 2, 
        xlab = paste0("PC1 (", vars[1]*100, "%)"),
        ylab = paste0("PC2 (", vars[2]*100, "%)")
   )
   if (labelPCA)
-    text(pc$x[, 1:2], labels = as.character(group))
+    text(pc$x[, checkPC], labels = as.character(group))
 }
