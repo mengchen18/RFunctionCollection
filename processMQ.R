@@ -11,12 +11,18 @@ read.proteinGroups <- function(file) {
                            "Unique.peptides.",
                            "Sequence.coverage.",
                            "Intensity.",
-                           "MS.MS.Count."), 
-                   log = c(T, T, F, F, F, F, F, F))
+                           "MS.MS.Count.",
+                           "MS.MS.count."
+  ), 
+  log = c(T, T, F, F, F, F, F, F, F), 
+  stringsAsFactors = FALSE)
+  
+  vi <- sapply(df$val, function(x) length(grep(x, colnames(pg))) > 0)
+  df <- df[vi, ]             
   
   i <- ! (grepl("^REV_", pg$Majority.protein.IDs) |
-    grepl("^CON_", pg$Majority.protein.IDs) |
-    pg$Only.identified.by.site == "+")
+            grepl("^CON_", pg$Majority.protein.IDs) |
+            pg$Only.identified.by.site == "+")
   
   annot <- pg[i, -grep(paste(df$val, collapse = "|"), colnames(pg))]
   
@@ -36,7 +42,8 @@ read.proteinGroups <- function(file) {
                val = df$val, log = df$log)
   names(ml) <- gsub("\\.$", "", df$val)
   
-  ml$iBAQ_mc <- sweep(ml$iBAQ, 2, colMedians(ml$iBAQ, na.rm = TRUE), "-") + median(ml$iBAQ, na.rm = TRUE)
+  if (!is.null(ml$iBAQ))
+    ml$iBAQ_mc <- sweep(ml$iBAQ, 2, colMedians(ml$iBAQ, na.rm = TRUE), "-") + median(ml$iBAQ, na.rm = TRUE)
   
   ml$annot <- annot
   ml
