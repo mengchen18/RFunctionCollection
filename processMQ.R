@@ -3,7 +3,7 @@
 #' @param file Maxquant proteinGroup.txt file path
 
 read.proteinGroups <- function(file) {
-  pg <- read.delim(file)
+  pg <- read.delim(file, stringsAsFactors = FALSE)
   df <- data.frame(val = c("iBAQ.",
                            "LFQ.intensity.", 
                            "Peptides.", 
