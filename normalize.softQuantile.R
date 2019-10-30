@@ -8,6 +8,8 @@
 #'   when sharedProtein = TRUE
 #' @importFrom matrixStats colQuantiles
 
+require(matrixStats)
+
 normalize.softQuantile <- function(x, probs = 0.5, sharedProtein = FALSE, ref = 1) {
   
   if (is.data.frame(x))
