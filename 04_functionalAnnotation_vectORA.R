@@ -8,52 +8,84 @@
 #' 
 #' @import fastmatch
 
-vectORA <- function(p.val, gene.id, geneset, p.thresh = 0.05, min.size = 3) {
+
+library(fastmatch)
+
+vectORA <- function(pathways, pvec, pvec.cut, pvecAnnot=NULL, 
+                    minOverlap = 3, minSize=5, maxSize=Inf, size_background = NULL,
+                    unconditional.or = TRUE, mtc.method = "fdr") {
   
-  library(fastmatch)
-  if (any(duplicated(gene.id)))
-    stop("duplicated gene IDs")
+  if (is.null(pvecAnnot))
+    pvecAnnot <- names(pvec)
   
-  go <- geneset
-  names(go) <- gene.id
-  go <- strsplit(go, split = " ")
-  go <- lapply(names(go), function(x) cbind(rep(x, length(go[[x]])), go[[x]]))
-  go <- do.call(rbind, go)
-  go <- go[!go[, 2] %in% c("available", "GO:not"), ]
-  go <- split(go[, 1], go[, 2])
-  go <- go[sapply(go, length) >= min.size]
+  allid <- unique(unlist(pvecAnnot))
+  allid.pathways <- unique(unlist(pathways))
+  bkgn <- sum(allid %fin% allid.pathways)
+  if (!is.null(size_background)) {
+    bkgn <- max(size_background, bkgn)
+    if (size_background < bkgn)
+      message(paste0("size_background is set to ", bkgn, "!" ))
+  }
   
-  i <- p.val < p.thresh
+  deid <- unique(unlist(pvecAnnot[pvec < pvec.cut]))
+  overlap <- lapply(pathways, function(x) x[x %fin% deid])
   
-  sigID <- gene.id[i]
-  nsigID <- length(sigID)
-  nid <- length(gene.id)
+  nol <- sapply(overlap, length)
+  ngs <- sapply(pathways, length)
+  i <- nol >=  minOverlap & ngs >= minSize & ngs <= maxSize
   
-  rmat <- sapply(names(go), function(x) {
-    gs1 <- go[[x]]
-    ii <- gs1 %in% sigID
-    inin <- sum(ii)
-    ctab <- rbind(c(inin, nsigID - inin), 
-                  c(length(gs1) - inin, nid - length(gs1) - nsigID + inin))
-    t <- fisher.test(ctab, alternative = "greater")
-    
-    c(geneset = x,
-      p.value = t$p.value,
-      OR = t$estimate[[1]],
-      overlap_size = inin,
-      overlap_id = paste(gs1[ii], collapse = ";")
-      )
-  })
-  df <- data.frame(
-    geneset = rmat["geneset" , ],
-    p.value = as.numeric(rmat["p.value", ]),
-    fdr = NA,
-    OR = as.numeric(rmat["OR", ]),
-    overlap_size = as.numeric(rmat["overlap_size", ]),
-    overlap_id = rmat["overlap_id", ],
-    row.names = NULL,
-    stringsAsFactors = FALSE)
-  df$fdr <- p.adjust(df$p.value, method = "fdr")
-  df <- df[order(df$OR, decreasing = TRUE), ]
-  df
+  pathways <- pathways[i]
+  overlap <- overlap[i]
+  nol <- nol[i]
+  ngs <- ngs[i]
+  
+  
+  bdf <- vectORA.core(
+    n.overlap = nol, 
+    n.de = length(deid), 
+    n.gs = ngs, 
+    n.bkg = bkgn, 
+    unconditional.or = unconditional.or, mtc.method = mtc.method)
+  cbind(
+    pathway = names(pathways),
+    bdf, 
+    overlap_ids = sapply(overlap, paste0, collapse = ";")
+  )
 }
+
+
+vectORA.core <- function(n.overlap, n.de, n.gs, n.bkg, unconditional.or = TRUE, mtc.method = "fdr") {
+  
+  pval <- phyper(q = n.overlap-1, m = n.gs, n = n.bkg - n.gs, k = n.de, lower.tail = FALSE)
+  
+  if (unconditional.or)
+    or <- (n.de/(n.de - n.overlap))/((n.gs-n.overlap)/(n.bkg - n.gs - n.de + n.overlap)) else {
+      stop("not implemneted yet!")
+    }
+  
+  data.frame(
+    p.value = pval,
+    p.adjusted = p.adjust(pval, method = mtc.method),
+    OR = or,
+    size_overlap = n.overlap,
+    size_geneset = n.gs,
+    size_input = n.de,
+    size_backgroung = n.bkg,
+    stringsAsFactors = FALSE
+  )
+}
+
+# # example
+# xq <- rbind(c(4, 2, 4), 
+#             c(20, 40, 10),
+#             c(11, 234, 10),
+#             c(200, 1000, 100))
+# 
+# vectORA(xq[1, ], xq[2, ], xq[3, ], xq[4, ])
+# 
+# apply(xq, 2, function(x1) {
+#   fisher.test(rbind(c(x1[1], x1[2]-x1[1]), c(x1[3]-x1[1], x1[4] - x1[2] - x1[3] + x1[1])), alternative = "greater")$p.value
+# })
+
+
+
