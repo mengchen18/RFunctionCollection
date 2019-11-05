@@ -1,3 +1,3 @@
 # RFunctionCollection
 
-This repository stores useful functions that don't belong to any packages.
+Collection of functions used for proteomics data analysis.
