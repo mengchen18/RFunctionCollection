@@ -60,7 +60,7 @@ vectORA.core <- function(n.overlap, n.de, n.gs, n.bkg, unconditional.or = TRUE, 
   pval <- phyper(q = n.overlap-1, m = n.gs, n = n.bkg - n.gs, k = n.de, lower.tail = FALSE)
   
   if (unconditional.or)
-    or <- (n.de/(n.de - n.overlap))/((n.gs-n.overlap)/(n.bkg - n.gs - n.de + n.overlap)) else {
+    or <- (n.overlap/(n.de - n.overlap))/((n.gs-n.overlap)/(n.bkg - n.gs - n.de + n.overlap)) else {
       stop("not implemneted yet!")
     }
   
