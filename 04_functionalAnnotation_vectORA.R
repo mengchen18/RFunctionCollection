@@ -9,7 +9,9 @@
 #' @param minOverlap the minimum required overlap between pathway and gene list, if the overlap is lower
 #'  than this value, no test would be done on this pathway
 #' @param minSize the minimum size of pathway should be tested
-#' @param minSize the maximum size of pathways should be tested
+#' @param maxSize the maximum size of pathways should be tested
+#' @param pathway_desc description of pathways, a name character vector storing the description of
+#'  of the pathway, the names should be the same as names in "pathways" argument.
 #' @param unconditional.or calculate odds ratio using Maximum Likelihood Estimate (the sample odds ratio). 
 #'  Note that the conditional Maximum Likelihood Estimate (MLE) is used in fisher.test. 
 #' @param mtc.method multiple test correction methods, passed to p.adjust function
@@ -17,7 +19,7 @@
 require(fastmatch)
 
 vectORA <- function(pathways, genelist, background, trimPathway = FALSE,
-                    minOverlap = 3, minSize=5, maxSize=Inf, 
+                    minOverlap = 3, minSize=5, maxSize=Inf, pathway_desc = NULL,
                     unconditional.or = TRUE, mtc.method = "fdr") {
   # check id, duplicates
   genelist <- unique(genelist)
@@ -41,6 +43,9 @@ vectORA <- function(pathways, genelist, background, trimPathway = FALSE,
   nol <- nol[i]
   ngs <- ngs[i]
   
+  if (!is.null(pathway_desc))
+  	pathway_annot_x <- pathway_desc[names(pathways)]
+
   bdf <- vectORA.core(
     n.overlap = nol, 
     n.de = length(genelist), 
@@ -49,6 +54,7 @@ vectORA <- function(pathways, genelist, background, trimPathway = FALSE,
     unconditional.or = unconditional.or, mtc.method = mtc.method)
   cbind(
     pathway = names(pathways),
+    pathway_annot = pathway_annot_x,
     bdf, 
     overlap_ids = sapply(overlap, paste0, collapse = ";")
   )
