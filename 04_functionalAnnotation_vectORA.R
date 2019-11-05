@@ -54,7 +54,7 @@ vectORA <- function(pathways, genelist, background, trimPathway = FALSE,
     unconditional.or = unconditional.or, mtc.method = mtc.method)
   cbind(
     pathway = names(pathways),
-    pathway_annot = pathway_annot_x,
+    desc = pathway_annot_x,
     bdf, 
     overlap_ids = sapply(overlap, paste0, collapse = ";")
   )
