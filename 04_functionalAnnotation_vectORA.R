@@ -16,6 +16,7 @@
 #'  Note that the conditional Maximum Likelihood Estimate (MLE) is used in fisher.test. 
 #' @param mtc.method multiple test correction methods, passed to p.adjust function
 #' @import fastmatch
+
 require(fastmatch)
 
 vectORA <- function(pathways, genelist, background, trimPathway = FALSE,
@@ -24,14 +25,14 @@ vectORA <- function(pathways, genelist, background, trimPathway = FALSE,
   # check id, duplicates
   genelist <- unique(genelist)
   if (length(background) == 1 && is.integer(background)) {
-  	bkgn <- background 
+    bkgn <- background 
   } else if (length(background) > 1 && is.character(background)) {
-  	background <- unique(background)
-  	bkgn <- length(background)
-  	if (trimPathway)
-  		pathways <- lapply(pathways, function(x) x[x %fin% background]) 
+    background <- unique(background)
+    bkgn <- length(background)
+    if (trimPathway)
+      pathways <- lapply(pathways, function(x) x[x %fin% background]) 
   } else 
-  	stop("Unknown background type!")
+    stop("Unknown background type!")
   
   overlap <- lapply(pathways, function(x) x[x %fin% genelist])
   
@@ -44,8 +45,8 @@ vectORA <- function(pathways, genelist, background, trimPathway = FALSE,
   ngs <- ngs[i]
   
   if (!is.null(pathway_desc))
-  	pathway_annot_x <- pathway_desc[names(pathways)]
-
+    pathway_annot_x <- pathway_desc[names(pathways)]
+  
   bdf <- vectORA.core(
     n.overlap = nol, 
     n.de = length(genelist), 
@@ -60,6 +61,30 @@ vectORA <- function(pathways, genelist, background, trimPathway = FALSE,
   )
 }
 
+#' @param n.overlap the number of overlap between de and gs. The number of white balls drawn 
+#'  without replacement from an urn which contains both black and white balls (compared to hyper).
+#' @param n.de the number of DE gene. The number of balls drawn from the urn (compared to hyper).
+#' @param n.gs the size of gene set. The number of white balls in the urn (compared to hyper).
+#' @param n.bkg the background size.
+#' @param unconditional.or calculate odds ratio using Maximum Likelihood Estimate (the sample odds ratio). 
+#'  Note that the conditional Maximum Likelihood Estimate (MLE) is used in fisher.test. 
+#' @param mtc.method multiple test correction methods, passed to p.adjust function
+#' @import fastmatch
+#' @examples
+#' xq <- rbind(c(4, 2, 4),
+#'             c(20, 40, 10),
+#'             c(11, 234, 10),
+#'             c(200, 1000, 100))
+#' 
+#' vectORA.core(xq[1, ], xq[2, ], xq[3, ], xq[4, ])
+#' vectORA.core(xq[1, ], xq[2, ], xq[3, ], xq[4, ], unconditional.or = TRUE)
+#' 
+#' # fisher's test
+#' t(apply(xq, 2, function(x1) {
+#'   v <- fisher.test(rbind(c(x1[1], x1[2]-x1[1]), c(x1[3]-x1[1], x1[4] - x1[2] - x1[3] + x1[1])), alternative = "greater")
+#'   c(p.value = v$p.value, v$estimate)
+#' }))
+
 
 vectORA.core <- function(n.overlap, n.de, n.gs, n.bkg, unconditional.or = TRUE, mtc.method = "fdr") {
   
@@ -67,7 +92,50 @@ vectORA.core <- function(n.overlap, n.de, n.gs, n.bkg, unconditional.or = TRUE, 
   
   if (unconditional.or)
     or <- (n.overlap/(n.de - n.overlap))/((n.gs-n.overlap)/(n.bkg - n.gs - n.de + n.overlap)) else {
-      stop("not implemneted yet!")
+
+      or <- function(n.overlap, n.gs, n.de, n.bkg) {        
+        m <- n.gs
+        n <- n.bkg - n.gs
+        k <- n.de
+        x <- n.overlap
+        lo <- pmax(0L, k - n)
+        hi <- pmin(k, m)
+        
+        supportl <- mapply(":", lo, hi, SIMPLIFY = FALSE)
+        
+        sapply(1:length(x), function(i) {
+          support <- supportl[[i]]
+          logdc <- dhyper(support, m[i], n[i], k[i], log = TRUE)
+          
+          dnhyper <- function(ncp) {
+            d <- logdc + log(ncp) * support
+            d <- exp(d - max(d))
+            d/sum(d)
+          }
+          mnhyper <- function(ncp) {
+            if (ncp == 0) 
+              return(lo[i])
+            if (ncp == Inf) 
+              return(hi[i])
+            sum(support * dnhyper(ncp))
+          }
+          mle <- function(x) {
+            if (x == lo[i]) 
+              return(0)
+            if (x == hi[i]) 
+              return(Inf)
+            
+            mu <- mnhyper(1)
+            if (mu > x) 
+              uniroot(function(t) mnhyper(t) - x, c(0, 1))$root
+            else if (mu < x) 
+              1/uniroot(function(t) mnhyper(1/t) - x, c(.Machine$double.eps, 1))$root
+            else 1
+          }
+          mle(x[i])
+        })  
+      }
+      or <- or(n.overlap=n.overlap, n.gs=n.gs, n.de=n.de, n.bkg=n.bkg)
     }
   
   data.frame(
@@ -82,17 +150,7 @@ vectORA.core <- function(n.overlap, n.de, n.gs, n.bkg, unconditional.or = TRUE, 
   )
 }
 
-# # example
-# xq <- rbind(c(4, 2, 4), 
-#             c(20, 40, 10),
-#             c(11, 234, 10),
-#             c(200, 1000, 100))
-# 
-# vectORA(xq[1, ], xq[2, ], xq[3, ], xq[4, ])
-# 
-# apply(xq, 2, function(x1) {
-#   fisher.test(rbind(c(x1[1], x1[2]-x1[1]), c(x1[3]-x1[1], x1[4] - x1[2] - x1[3] + x1[1])), alternative = "greater")$p.value
-# })
+
 
 
 
