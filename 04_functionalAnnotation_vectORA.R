@@ -51,7 +51,7 @@ vectORA <- function(pathways, genelist, background, trimPathway = FALSE,
   nol <- nol[i]
   ngs <- ngs[i]
   
-  pathway_annot_x <- NULL
+  pathway_annot_x <- ""
   if (!is.null(pathway_desc))
     pathway_annot_x <- pathway_desc[names(pathways)]
   
