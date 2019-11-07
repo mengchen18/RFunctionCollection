@@ -15,13 +15,15 @@
 #' @param unconditional.or calculate odds ratio using Maximum Likelihood Estimate (the sample odds ratio). 
 #'  Note that the conditional Maximum Likelihood Estimate (MLE) is used in fisher.test. 
 #' @param mtc.method multiple test correction methods, passed to p.adjust function
+#' @param sort could be one of c("none", "p.value", "OR") to indicate how the result should be sorted. 
 #' @import fastmatch
 
 require(fastmatch)
 
 vectORA <- function(pathways, genelist, background, trimPathway = FALSE,
                     minOverlap = 3, minSize=5, maxSize=Inf, pathway_desc = NULL,
-                    unconditional.or = TRUE, mtc.method = "fdr") {
+                    unconditional.or = TRUE, mtc.method = "fdr", 
+                    sort = c("none", "p.value", "OR")[1]) {
   # check id, duplicates
   genelist <- unique(genelist)
   if (length(background) == 1 && is.integer(background)) {
@@ -53,12 +55,20 @@ vectORA <- function(pathways, genelist, background, trimPathway = FALSE,
     n.gs = ngs, 
     n.bkg = bkgn, 
     unconditional.or = unconditional.or, mtc.method = mtc.method)
-  cbind(
+  rs <- cbind(
     pathway = names(pathways),
     desc = pathway_annot_x,
     bdf, 
     overlap_ids = sapply(overlap, paste0, collapse = ";")
   )
+  sort <- sort[1]
+  if (sort == "p.value") {
+    rs <- rs[order(rs$p.value, decreasing = FALSE), ]
+  } else if (sort == "OR") {
+    rs <- rs[order(rs$OR, decreasing = TRUE), ]
+  } else if (sort != "none") 
+    warning("Unknown sort method, the results are not sorted!")
+  rs
 }
 
 #' @param n.overlap the number of overlap between de and gs. The number of white balls drawn 
