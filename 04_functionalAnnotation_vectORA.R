@@ -26,9 +26,14 @@ vectORA <- function(pathways, genelist, background, trimPathway = FALSE,
                     sort = c("none", "p.value", "OR")[1]) {
   # check id, duplicates
   genelist <- unique(genelist)
+
   if (length(background) == 1 && is.integer(background)) {
     bkgn <- background 
   } else if (length(background) > 1 && is.character(background)) {
+    if (!all(genelist %in% background)) {
+      background <- c(background, genelist)
+      message("Some IDs in genelist is not in background, background is expanded!")
+    }
     background <- unique(background)
     bkgn <- length(background)
     if (trimPathway)
@@ -46,6 +51,7 @@ vectORA <- function(pathways, genelist, background, trimPathway = FALSE,
   nol <- nol[i]
   ngs <- ngs[i]
   
+  pathway_annot_x <- NULL
   if (!is.null(pathway_desc))
     pathway_annot_x <- pathway_desc[names(pathways)]
   
