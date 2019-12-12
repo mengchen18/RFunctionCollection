@@ -80,5 +80,41 @@ read.proteinGroups.tmt <- function(file) {
   lsind
 }
 
-
+#' Read modificationSpecificPeptides output of maxquant output and split
+#'   it to columns
+#' @param file Maxquant proteinGroup.txt file path
+#' @param modifications the modification to be included
+read.modSepPep <- function(file, modifications = "Phospho \\(STY\\)") {
+  
+  dat <- read.delim(file, stringsAsFactors = FALSE)
+  df <- data.frame(val = c("Intensity.", "Fraction.", "Experiment."), 
+                   log = c(T, F, F), 
+                   stringsAsFactors = FALSE)
+  
+  vi <- sapply(df$val, function(x) length(grep(x, colnames(dat))) > 0)
+  df <- df[vi, ]             
+  i <- dat$Potential.contaminant != "+" & dat$Reverse != "+" & grepl("Phospho \\(STY\\)", dat$Modifications)
+  
+  annot <- dat[i, -grep(paste(df$val, collapse = "|"), colnames(dat))]
+  nn <- grep("Intensity.", colnames(dat))
+  getExpr <- function(x, type = "iBAQ.", log = TRUE, keep.row = NULL) {
+    if (length(grep(type, colnames(x), ignore.case = TRUE)) < length(nn))
+      return(NULL)
+    val <- apply(dat[, grep(type, colnames(x), ignore.case = TRUE)], 2, as.numeric)
+    if (log) {
+      val <- log10(val)
+      val[is.infinite(val)] <- NA
+    }
+    if (!is.null(keep.row))
+      val <- val[keep.row, ]
+    colnames(val) <- gsub(type, "", colnames(val))
+    val
+  }
+  ml <- mapply(function(val, log) getExpr(dat, type = val, log = log, keep.row = i), 
+               val = df$val, log = df$log)
+  names(ml) <- gsub("\\.$", "", df$val)
+  
+  ml$annot <- annot 
+  ml
+}
 
