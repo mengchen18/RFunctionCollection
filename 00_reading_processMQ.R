@@ -12,9 +12,10 @@ read.proteinGroups <- function(file) {
                            "Sequence.coverage.",
                            "Intensity.",
                            "MS.MS.Count.",
-                           "MS.MS.count."
+                           "MS.MS.count.",
+                           "Identification.type."
   ), 
-  log = c(T, T, F, F, F, F, F, F, F), 
+  log = c(T, T, F, F, F, F, F, F, F, F), 
   stringsAsFactors = FALSE)
   
   vi <- sapply(df$val, function(x) length(grep(x, colnames(pg))) > 0)
