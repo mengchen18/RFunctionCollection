@@ -1,4 +1,4 @@
-plotQC <- function(x, group, labelPCA = FALSE, fillNA = TRUE, checkPC = 1:2) {
+plotQC <- function(x, group, labelPCA = FALSE, fillNA = TRUE, checkPC = 1:2, type = c("protein", "metabolites")[1]) {
   
   require(matrixStats)
   require(randomcoloR)
@@ -19,7 +19,7 @@ plotQC <- function(x, group, labelPCA = FALSE, fillNA = TRUE, checkPC = 1:2) {
   shareid <- colSums(!is.na(rowCumsums(idna)))
   
   bp <- barplot(colSums(idmat, na.rm = TRUE), col = pal[as.character(group)], 
-                las = 2, ylim = ceiling(c(0, nrow(emat)*1.05)), ylab = "# protein IDs")
+                las = 2, ylim = ceiling(c(0, nrow(emat)*1.05)), ylab = sprintf("# %s IDs", type))
   lines(bp, colSums(rowCumsums(idmat) > 0), col = 1)
   points(bp, colSums(rowCumsums(idmat) > 0), col = 1, pch = 19)
   lines(bp, shareid, col = 1, lty = 2)
