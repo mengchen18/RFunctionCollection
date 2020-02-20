@@ -39,6 +39,12 @@ pantherJson2df <- function(js) {
   numcol <- c("GO_group", "GO_level", "N_reference", "N_observed", "N_expected",
     "Fold_enrichment", "Q_value")
   tab[numcol] <- lapply(tab[numcol], as.numeric)
+  
+  attr(t, "tool_release_date") <- js$overrepresentation$tool_release_date
+  attr(t, "data_version_release_date") <- js$overrepresentation$data_version_release_date
+  attr(t, "test_type") <- js$overrepresentation$test_type
+  attr(t, "correction") <- js$overrepresentation$correction
+  attr(t, "annotation_type") <- js$overrepresentation$annotation_type
   tab
 }
 
