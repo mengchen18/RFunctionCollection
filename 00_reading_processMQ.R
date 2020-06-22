@@ -44,7 +44,7 @@ read.proteinGroups <- function(file) {
   names(ml) <- gsub("\\.$", "", df$val)
   
   if (!is.null(ml$iBAQ))
-    ml$iBAQ_mc <- sweep(ml$iBAQ, 2, colMedians(ml$iBAQ, na.rm = TRUE), "-") + median(ml$iBAQ, na.rm = TRUE)
+    ml$iBAQ_mc <- sweep(ml$iBAQ, 2, matrixStats::colMedians(ml$iBAQ, na.rm = TRUE), "-") + median(ml$iBAQ, na.rm = TRUE)
   
   ml$annot <- annot
   ml
