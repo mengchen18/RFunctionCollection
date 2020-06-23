@@ -45,4 +45,9 @@ plotQC <- function(x, group, labelPCA = FALSE, fillNA = TRUE, checkPC = 1:2, typ
   )
   if (labelPCA)
     text(pc$x[, checkPC], labels = as.character(group))
+  
+  list(ID = shareid, 
+       pc = pc$x,
+       pc_sdev = pc$sdev
+      )
 }
