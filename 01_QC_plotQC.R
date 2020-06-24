@@ -48,6 +48,7 @@ plotQC <- function(x, group, labelPCA = FALSE, fillNA = TRUE, checkPC = 1:2, typ
   
   list(ID = shareid, 
        pc = pc$x,
-       pc_sdev = pc$sdev
+       pc_sdev = pc$sdev,
+       pc_loading = pc$rotation
       )
 }
