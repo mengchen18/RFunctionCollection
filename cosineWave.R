@@ -88,9 +88,10 @@ cosineWave <- function(x, y, model = c("single", "double")[1]) {
       alg <- "plinear"
     }
     if (!goodNLS(fit))  { 
-      fit <- minpack.lm::nlsLM(
-        form, data = data.frame(x = x, y = y, pi = pi), start = par.init, lower = par.lower, upper = par.upper
-      )
+      fit <- try(
+        minpack.lm::nlsLM(
+          form, data = data.frame(x = x, y = y, pi = pi), start = par.init, lower = par.lower, upper = par.upper
+        ), silent = TRUE) 
       alg <- "nlsLM"
     }
   })
