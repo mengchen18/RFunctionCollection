@@ -116,11 +116,11 @@ multi.t.test <- function(x, label, compare = NULL, xlsx.file = NULL, other.sheet
   lc <- lapply(compare, function(c1) {
     if (length(c1) == 2) {
       
-      m1 <- rowMeans(x[, label == c1[1]], na.rm = TRUE)
-      m2 <- rowMeans(x[, label == c1[2]], na.rm = TRUE)
+      m1 <- rowMeans(x[, label == c1[1], drop = FALSE], na.rm = TRUE)
+      m2 <- rowMeans(x[, label == c1[2], drop = FALSE], na.rm = TRUE)
       df <- data.frame(m1 = m1, m2 = m2, q1 = NA, q2 = NA)
-      df$n1 <- rowSums(!is.na(x[, label == c1[1]]))
-      df$n2 <- rowSums(!is.na(x[, label == c1[2]]))
+      df$n1 <- rowSums(!is.na(x[, label == c1[1], drop = FALSE]))
+      df$n2 <- rowSums(!is.na(x[, label == c1[2], drop = FALSE]))
       nom1 <- na.omit(df$m1)
       nom2 <- na.omit(df$m2)
       df$q1[!is.na(df$m1)] <- rank(nom1)/length(nom1)
