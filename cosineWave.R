@@ -98,13 +98,13 @@ cosineWave <- function(x, y, model = c("single", "double")[1]) {
   if (goodNLS(fit)) {
     ci <- suppressWarnings(suppressMessages(try(confint(fit), silent = TRUE)))
     if (inherits(ci, "try-error")) {
-      cin <-  paste(rep(names(coef(fit)), each = 2), rep(c("2.5%", "97.5%"), time = 3), sep = "_")
+      cin <-  paste(rep(names(par.init), each = 2), rep(c("2.5%", "97.5%"), time = 3), sep = "_")
       ci <- structure(rep(NA, length(cin)), names = cin)
     } else 
       ci <- structure(c(t(ci)), names = paste(rep(rownames(ci), each = 2), rep(colnames(ci), time = 3), sep = "_"))
     mse <- mean(residuals(fit)^2)
     rsq <- max(1 - var(residuals(fit))/var(y), 0)
-    res <- c(coef(fit), pseudoRsq = rsq, MSE = mse, n = length(x), CI = ci)
+    res <- c(coef(fit)[names(par.init)], pseudoRsq = rsq, MSE = mse, n = length(x), CI = ci)
     attr(res, "algrithm") <- alg
   } else {    
     res <- ret_invalid
