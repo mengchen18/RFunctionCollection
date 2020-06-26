@@ -103,7 +103,7 @@ cosineWave <- function(x, y, model = c("single", "double")[1]) {
     } else 
       ci <- structure(c(t(ci)), names = paste(rep(rownames(ci), each = 2), rep(colnames(ci), time = 3), sep = "_"))
     mse <- mean(residuals(fit)^2)
-    rsq <- 1 - var(residuals(fit))/var(y)
+    rsq <- max(1 - var(residuals(fit))/var(y), 0)
     res <- c(coef(fit), pseudoRsq = rsq, MSE = mse, n = length(x), CI = ci)
     attr(res, "algrithm") <- alg
   } else {    
