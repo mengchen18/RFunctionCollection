@@ -63,6 +63,16 @@ cosineWave <- function(x, y, model = c("single", "double")[1]) {
     r
   }
   
+  cin <-  paste(rep(names(par.init), each = 2), rep(c("2.5%", "97.5%"), time = 3), sep = "_")
+  ci <- structure(rep(NA, length(cin)), names = cin)
+  cf <- structure(rep(NA, length(par.init)), names = names(par.init))
+  ret_invalid <- c(cf, pseudoRsq = NA, MSE = NA, n = NA, CI = ci)
+  
+  if (length(x) <= length(par.init))
+    return(  
+      list(fit = NA, summary = ret_invalid)
+          )
+  
   suppressWarnings({
     fit <- try(
       nls(form, start = par.init, algorithm="port", lower = par.lower, upper = par.upper, 
@@ -96,12 +106,8 @@ cosineWave <- function(x, y, model = c("single", "double")[1]) {
     rsq <- 1 - var(residuals(fit))/var(y)
     res <- c(coef(fit), pseudoRsq = rsq, MSE = mse, n = length(x), CI = ci)
     attr(res, "algrithm") <- alg
-  } else {
-    cin <-  paste(rep(names(par.init), each = 2), rep(c("2.5%", "97.5%"), time = 3), sep = "_")
-    ci <- structure(rep(NA, length(cin)), names = cin)
-    mse <- NA
-    cf <- structure(rep(NA, length(par.init)), names = names(par.init))
-    res <- c(cf, pseudoRsq = NA, MSE = mse, n = NA, CI = ci)
+  } else {    
+    res <- ret_invalid
   }
   list(
     fit = fit, summary = res
