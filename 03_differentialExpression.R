@@ -200,6 +200,40 @@ multi.t.test <- function(x, label, compare = NULL, xlsx.file = NULL, other.sheet
 }
 
 
+
+prepMTRes <- function(x) {
+  names(x)
+  i <- names(x)[1]
+  
+  v <- lapply(names(x), function(i) {
+    ist <- strsplit(i, "_")[[1]]
+    
+    x1 <- x[[i]]
+    x1$log_pval <- -log10(x1$pval)
+    x1$log_fdr <- -log10(x1$fdr)
+    
+    vv <- !grepl("1$|2$", colnames(x1))
+    colnames(x1) <- gsub("1$", paste0("_", ist[1]), colnames(x1))
+    colnames(x1) <- gsub("2$", paste0("_", ist[2]), colnames(x1))
+    colnames(x1)[vv] <- paste(colnames(x1)[vv], i, sep = '_')
+    x1
+  })
+  v <- do.call(cbind, v)
+  v <- v[, !duplicated(colnames(v))]
+  cn <- colnames(v)
+  ii <- c(grep("m_",cn), grep("q_", cn), grep("n_", cn))
+  cbind(v[, ii], v[-ii])
+}
+
+
+prepPCRes <- function(x) {
+  n <- min(ncol(x$x), 6)
+  l <- paste0(colnames(x$x)[1:n], "(", round((x$sdev^2/sum(x$sdev^2))[1:n]*100, digits = 2), "%", ")")
+  m <- x$x[, 1:n]
+  colnames(m) <- l
+  m
+}
+
 #' @title Basic QC for MQ output, used after calling "read.proteinGroups"
 #' @description basic QC, including barplot for IDs, boxplot and PCA
 #' @param x the input matrix, usually a proteingroups table from maxquant
