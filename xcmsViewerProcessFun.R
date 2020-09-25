@@ -92,7 +92,7 @@ phenoFeatureData <- function(
 ) {
   
   if (is.null(pheno))
-    pheno <- pData(object)
+    pheno <- Biobase::pData(object@featureSet)
   
   ts <- multi.t.test2(
     x = exprs(object@featureSet), 
