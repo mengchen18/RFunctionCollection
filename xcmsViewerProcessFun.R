@@ -114,7 +114,7 @@ phenoFeatureData <- function(
   
   pData(object@featureSet) <- pd
   fData(object@featureSet) <- fd
-  object@featureSet@assayDaata$exprs.normalized <- mat.ori
+  object@featureSet@assayData$exprs.normalized <- mat.ori
   
   object
 }
