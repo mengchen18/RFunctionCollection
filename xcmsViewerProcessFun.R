@@ -95,7 +95,7 @@ phenoFeatureData <- function(
     pheno <- Biobase::pData(object@featureSet)
   
   ts <- multi.t.test2(
-    x = exprs(object@featureSet), 
+    x = Biobase::exprs(object@featureSet), 
     compare = compare, 
     pheno = pheno,
     log10 = log10, 
