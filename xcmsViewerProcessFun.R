@@ -108,7 +108,6 @@ phenoFeatureData <- function(
   pc <- pca(mat)
   
   fd <- cbind(fData(object@featureSet), ts[-1], pc$features)
-  fd$peakidx <- NULL
   
   pd <- cbind(pd, "n value" = colSums(!is.na(exprs(object@featureSet))), pc$samples)
   
