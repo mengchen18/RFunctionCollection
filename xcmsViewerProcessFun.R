@@ -136,8 +136,13 @@ multi.pca <- function(x, pheno, compare, n = 6) {
   )
 }
 
-
-  
+updateDF <- function(x, d) {
+    ii <- intersect(colnames(x), colnames(d))
+    ia <- setdiff(colnames(d), colnames(x))
+    x[, ii] <- d[, ii]
+    x <- cbind(x, d[, ia])
+    x
+  }
 
 ###
 phenoFeatureData <- function(
@@ -166,13 +171,7 @@ phenoFeatureData <- function(
   fd <- cbind(fData(object@featureSet), ts[-1], pc$features)
   pd <- cbind(pd, "n value" = colSums(!is.na(exprs(object@featureSet))), pc$samples)
   
-  updateDF <- function(x, d) {
-    ii <- intersect(colnames(x), colnames(d))
-    ia <- setdiff(colnames(d), colnames(x))
-    x[, ii] <- d[, ii]
-    x <- cbind(x, d[, ia])
-    x
-  }
+
   
   pData(object@featureSet) <- updateDF(pData(object@featureSet), pd)
   fData(object@featureSet) <- updateDF(fData(object@featureSet), fd)
