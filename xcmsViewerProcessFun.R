@@ -131,8 +131,8 @@ multi.pca <- function(x, pheno, compare, n = 6) {
   },  temp_sample = temp_sample, temp_feature = temp_feature)
   
   list(
-    samples = data.frame(do.call(cbind, lapply(t, "[[", "samples")), stringsAsFactors = FALSE),
-    features = data.frame(do.call(cbind, lapply(t, "[[", "features")), stringsAsFactors = FALSE)
+    samples = data.frame(do.call(cbind, lapply(t, "[[", "samples")), stringsAsFactors = FALSE, check.names = FALSE),
+    features = data.frame(do.call(cbind, lapply(t, "[[", "features")), stringsAsFactors = FALSE, check.names = FALSE)
   )
 }
 
