@@ -15,7 +15,7 @@ multi.t.test2 <- function(x, pheno, compare = NULL, log10 = FALSE, median.center
     tl <- NULL
   } else {
     tl <- lapply(unique(compare[, 1]), function(x) {
-      x <- compare[x == compare[, 1], -1]
+      x <- compare[x == compare[, 1], -1, drop = FALSE]
       unique(unlist(split(x, row(x))))
     })
     names(tl) <- unique(compare[, 1])
@@ -141,7 +141,7 @@ multi.pca <- function(x, pheno, compare, n = 6) {
 
 ###
 phenoFeatureData <- function(
-  object, compare.t.test = NA, compare.pca = list("_all_" = TRUE),
+  object, compare.t.test = NULL, compare.pca = list("_all_" = TRUE),
   pheno=NULL, log10 = TRUE, median.center = TRUE, fillNA = TRUE, 
   nf = 6, ...
 ) {
