@@ -11,11 +11,15 @@ multi.t.test2 <- function(x, pheno, compare = NULL, log10 = FALSE, median.center
     halfValue <- function(x) x - log10(2)
   }
   
-  tl <- lapply(unique(compare[, 1]), function(x) {
-    x <- compare[x == compare[, 1], -1]
-    unique(unlist(split(x, row(x))))
-  })
-  names(tl) <- unique(compare[, 1])
+  if (is.null(compare)) {
+    tl <- NULL
+  } else {
+    tl <- lapply(unique(compare[, 1]), function(x) {
+      x <- compare[x == compare[, 1], -1]
+      unique(unlist(split(x, row(x))))
+    })
+    names(tl) <- unique(compare[, 1])
+  }
   
   if (median.center)
     x <- sweep(x, 2, matrixStats::colMedians(x, na.rm = TRUE), "-") + median(x, na.rm = TRUE)
@@ -28,9 +32,9 @@ multi.t.test2 <- function(x, pheno, compare = NULL, log10 = FALSE, median.center
       rm <- rowMeans(m, na.rm = TRUE)
       rq <- rank(rm, na.last = TRUE)/sum(!is.na(rm))
       rq[is.na(rm)] <- NA
-      df[[paste("mean", j)]] <- rm
-      df[[paste("n value", j)]] <- rv
-      df[[paste("quantile", j)]] <- rq
+      df[[paste("mean", j, sep = "|")]] <- rm
+      df[[paste("n value", j, sep = "|")]] <- rv
+      df[[paste("quantile", j, sep = "|")]] <- rq
     }
   }
   
@@ -65,20 +69,20 @@ multi.t.test2 <- function(x, pheno, compare = NULL, log10 = FALSE, median.center
   if (log10)
     x.ori <- 10^x else
       x.ori <- x
-      
-    
+  
+  
   list(ttest = df, mat = x, mat.rawscale = x.ori)
 }
 
 #####
-pca <- function(x, n = 6) {
+pca <- function(x, n = 6, prefix = "") {
   
   writePC <- function(x, n) {
     var <- round(x$sdev[1:n]^2/(sum(x$sdev^2))*100, digits = 1)
     xx <- x$x[, 1:min(n, ncol(x$x))]
-    colnames(xx) <- paste0(colnames(xx), " (", var, "%", ")")
+    colnames(xx) <- paste0(prefix, "|", colnames(xx), " (", var, "%", ")")
     pp <- x$rotation[, 1:min(n, ncol(x$x))]
-    colnames(pp) <- paste0(colnames(pp), " (", var, "%", ")")
+    colnames(pp) <- paste0(prefix, "|", colnames(pp), " (", var, "%", ")")
     list(samples = xx, features = pp)
   }
   
@@ -86,9 +90,60 @@ pca <- function(x, n = 6) {
   writePC(pc, n = n)
 }
 
+
+multi.pca <- function(x, pheno, compare, n = 6) {
+  
+  cn <- setdiff(names(compare), c("_all_", colnames(pheno)))
+  if (length(cn) > 0)
+    stop(sprintf("These columns do not exist in pheno: %s", paste(cn, collapse = ", ")))
+  
+  if (!inherits(x, "matrix"))
+    x <- apply(x, 2, as.numeric)
+  
+  temp_sample <- matrix(NA, nrow = ncol(x), ncol = n)
+  rownames(temp_sample) <- rownames(pheno)
+  temp_feature <- matrix(NA, nrow = nrow(x), ncol = n)
+  rownames(temp_feature) <- rownames(x)
+  
+  t <- lapply(names(compare), function(i, temp_sample, temp_feature) {
+    if (i == "_all_") {
+      v <- pca(x, n = n, prefix = "PCA|AllSamples")
+    } else {
+      ph <- pheno[[i]]
+      
+      sd <- setdiff(compare[[i]], ph)
+      if (length(sd) > 0)
+        stop(sprintf("Column '%s' in 'pheno' do not contain these vaues: %s", i, paste(sd, collapse = ", ")))
+      
+      ii <- which(ph %in% compare[[i]])
+      x0 <- x[, ii]
+      ir <- which(matrixStats::rowVars(x0, na.rm = TRUE) > 0)
+      x0 <- x0[ir, ]
+      
+      pc <- pca(x0, n = n, prefix = paste(c("PCA", compare[[i]]), collapse = "|"))
+      temp_sample[ii, ] <- pc$samples
+      colnames(temp_sample) <- colnames(pc$samples)
+      temp_feature[ir, ] <- pc$features
+      colnames(temp_feature) <- colnames(pc$features)
+      v <- list(samples = temp_sample, features = temp_feature)  
+    }
+    v
+  },  temp_sample = temp_sample, temp_feature = temp_feature)
+  
+  list(
+    samples = data.frame(do.call(cbind, lapply(t, "[[", "samples")), stringsAsFactors = FALSE),
+    features = data.frame(do.call(cbind, lapply(t, "[[", "features")), stringsAsFactors = FALSE)
+  )
+}
+
+
+  
+
 ###
 phenoFeatureData <- function(
-  object, compare, pheno=NULL, log10 = TRUE, median.center = TRUE, fillNA = TRUE, ...
+  object, compare.t.test = NA, compare.pca = list("_all_" = TRUE),
+  pheno=NULL, log10 = TRUE, median.center = TRUE, fillNA = TRUE, 
+  nf = 6, ...
 ) {
   
   if (is.null(pheno))
@@ -96,7 +151,7 @@ phenoFeatureData <- function(
   
   ts <- multi.t.test2(
     x = Biobase::exprs(object@featureSet), 
-    compare = compare, 
+    compare = compare.t.test, 
     pheno = pheno,
     log10 = log10, 
     median.center = median.center, 
@@ -105,14 +160,22 @@ phenoFeatureData <- function(
   mat <- ts$mat
   mat.ori <- ts$mat.rawscale
   ts <- ts$ttest
-  pc <- pca(mat)
+  
+  pc <- multi.pca(mat, pheno = pheno, compare = compare.pca, n = nf)
   
   fd <- cbind(fData(object@featureSet), ts[-1], pc$features)
-  
   pd <- cbind(pd, "n value" = colSums(!is.na(exprs(object@featureSet))), pc$samples)
   
-  pData(object@featureSet) <- pd
-  fData(object@featureSet) <- fd
+  updateDF <- function(x, d) {
+    ii <- intersect(colnames(x), colnames(d))
+    ia <- setdiff(colnames(d), colnames(x))
+    x[, ii] <- d[, ii]
+    x <- cbind(x, d[, ia])
+    x
+  }
+  
+  pData(object@featureSet) <- updateDF(pData(object@featureSet), pd)
+  fData(object@featureSet) <- updateDF(fData(object@featureSet), fd)
   object@featureSet@assayData$exprs.normalized <- mat.ori
   
   object
