@@ -80,7 +80,7 @@ findOutlier <- function(x, foldthresh = 5, logbase = c(10, 2, "e")[1], reachLowB
     i3[which(sx[2, ] > cc)] <- FALSE
   ii <- which(i3 & (i1 | i2))
   
-  om <- x[ii, ]
+  om <- x[ii, , drop = FALSE]
   rmax <- rowMaxs(om, na.rm = TRUE)
   ct <- lapply(1:ncol(om), function(p) {
     ii[which(om[, p] == rmax)]
