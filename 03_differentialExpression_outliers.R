@@ -22,7 +22,8 @@ outlierThresh <- function(x, nbreaks = 100, window = 0.05, pvalue = 0.05) {
   rat <- sapply(vec, function(v) {
     i <- which(rmax < v + window & rmax > v - window)
     tb <- table(nna[i])
-    round(tb[as.character(max.na)]/sum(tb), digits = 2)
+    # round(tb[as.character(max.na)]/sum(tb), digits = 2)
+    round(sum(nna[i] == max.na)/sum(tb), digits = 2)    
   })
   
   ord <- order(vec, decreasing = FALSE)
