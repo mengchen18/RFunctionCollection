@@ -1,18 +1,32 @@
-
-
 multi.t.test2 <- function(x, pheno, compare = NULL, log10 = FALSE, median.center = TRUE, fillNA = TRUE, ...) {
   
   if (is.null(rownames(x)))
     rownames(x) <- 1:nrow(x)
   
-  halfValue <- function(x) x/2
+  halfValue <- function(x) x/2  
   if (log10) {
     x <- apply(x, 2, log10)
     halfValue <- function(x) x - log10(2)
   }
   
+  if (median.center)
+    x <- sweep(x, 2, matrixStats::colMedians(x, na.rm = TRUE), "-") + median(x, na.rm = TRUE)
+  
+  if (fillNA) {
+    x <- apply(x, 1, function(xx) {
+      x3 <- xx
+      x3[is.na(x3)] <- halfValue(min(x3, na.rm = TRUE))
+      x3
+    })
+    x <- t(x)
+  }
+  
+  if (log10)
+    x.ori <- 10^x else
+      x.ori <- x
+  
   if (is.null(compare)) {
-    tl <- NULL
+    return( list(ttest = NULL, mat = x, mat.rawscale = x.ori) )
   } else {
     tl <- lapply(unique(compare[, 1]), function(x) {
       x <- compare[x == compare[, 1], -1, drop = FALSE]
@@ -20,9 +34,6 @@ multi.t.test2 <- function(x, pheno, compare = NULL, log10 = FALSE, median.center
     })
     names(tl) <- unique(compare[, 1])
   }
-  
-  if (median.center)
-    x <- sweep(x, 2, matrixStats::colMedians(x, na.rm = TRUE), "-") + median(x, na.rm = TRUE)
   
   df <- data.frame(metabolite = rownames(x), stringsAsFactors = FALSE)
   for ( i in names(tl) ) {
@@ -36,17 +47,7 @@ multi.t.test2 <- function(x, pheno, compare = NULL, log10 = FALSE, median.center
       df[[paste("n value", j, sep = "|")]] <- rv
       df[[paste("quantile", j, sep = "|")]] <- rq
     }
-  }
-  
-  if (fillNA) {
-    x <- apply(x, 1, function(xx) {
-      x3 <- xx
-      x3[is.na(x3)] <- halfValue(min(x3, na.rm = TRUE))
-      x3
-    })
-    x <- t(x)
-  }
-  
+  }  
   for ( i in 1:nrow(compare) ) {
     v <- compare[i, ]
     i1 <- pheno[[v[1]]] == v[2]
@@ -64,13 +65,7 @@ multi.t.test2 <- function(x, pheno, compare = NULL, log10 = FALSE, median.center
     df[[paste("ttest", "fdr", v[2], v[3], sep = "|")]] <- p.adjust(tv[1, ], method = "fdr")
     df[[paste("ttest", "log.fdr", v[2], v[3], sep = "|")]] <- -log10(df[[paste("ttest", "fdr", v[2], v[3], sep = "|")]])
     df[[paste("ttest", "mean.diff", v[2], v[3], sep = "|")]] <- tv[2, ]
-  }
-  
-  if (log10)
-    x.ori <- 10^x else
-      x.ori <- x
-  
-  
+  }  
   list(ttest = df, mat = x, mat.rawscale = x.ori)
 }
 
