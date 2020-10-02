@@ -166,7 +166,7 @@ phenoFeatureData <- function(
   if (!is.null(ts$ttest))
     fd <- cbind(fd, ts[-1])
   
-  pd <- cbind(pd, "n value" = colSums(!is.na(exprs(object@featureSet))), pc$samples)
+  pd <- cbind(pheno, "n value" = colSums(!is.na(exprs(object@featureSet))), pc$samples)
     
   pData(object@featureSet) <- updateDF(pData(object@featureSet), pd)
   fData(object@featureSet) <- updateDF(fData(object@featureSet), fd)
