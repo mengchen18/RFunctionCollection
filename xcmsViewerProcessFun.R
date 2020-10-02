@@ -162,12 +162,12 @@ phenoFeatureData <- function(
   ts <- ts$ttest
   
   pc <- multi.pca(mat, pheno = pheno, compare = compare.pca, n = nf)
+  fd <- cbind(fData(object@featureSet), pc$features)
+  if (!s.null(ts$ttest))
+    fd <- cbind(fd, ts[-1])
   
-  fd <- cbind(fData(object@featureSet), ts[-1], pc$features)
   pd <- cbind(pd, "n value" = colSums(!is.na(exprs(object@featureSet))), pc$samples)
-  
-
-  
+    
   pData(object@featureSet) <- updateDF(pData(object@featureSet), pd)
   fData(object@featureSet) <- updateDF(fData(object@featureSet), fd)
   object@featureSet@assayData$exprs.normalized <- mat.ori
