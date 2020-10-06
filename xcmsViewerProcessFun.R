@@ -163,8 +163,8 @@ phenoFeatureData <- function(
   
   pc <- multi.pca(mat, pheno = pheno, compare = compare.pca, n = nf)
   fd <- cbind(fData(object@featureSet), pc$features)
-  if (!is.null(ts$ttest))
-    fd <- cbind(fd, ts[-1])
+  if (!is.null(ts))
+     fd <- cbind(fd, ts[-1])
   
   pd <- cbind(pheno, "n value" = colSums(!is.na(exprs(object@featureSet))), pc$samples)
     
