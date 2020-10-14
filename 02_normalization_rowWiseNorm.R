@@ -6,7 +6,7 @@
 #'   the mean of all channels will be used as batch reference.
 #' @importFrom matrixStats rowMeans
 
-rowshift <- function(x, batch, ref=NULL) {
+rowshift <- function(x, batch, ref=NULL, useMean = FALSE) {
   
   if (is.data.frame(x))
     x <- apply(x, 2, as.numeric)
@@ -16,10 +16,17 @@ rowshift <- function(x, batch, ref=NULL) {
   b_ref <- batch[ref]
   expr_ref <- x[, ref, drop=FALSE]
   grandmeans <- rowMeans(expr_ref, na.rm = TRUE)
+  grandmeans2 <- rowMeans(expr, na.rm = TRUE)
+  
   for (i in unique(batch)) {
     off <- rowMeans(expr_ref[, b_ref == i, drop = FALSE], na.rm = TRUE) - grandmeans
+    if (useMean) {
+      off2 <- rowMeans(x[, batch == i, drop = FALSE], na.rm = TRUE) - grandmeans2
+      ona <- is.na(off)
+      off[ona] <- off2[ona]
+    }
     x[, batch == i] <- x[, batch == i] - off
   }
   x
-  
 }
+
