@@ -16,7 +16,7 @@ rowshift <- function(x, batch, ref=NULL, useMean = FALSE) {
   b_ref <- batch[ref]
   expr_ref <- x[, ref, drop=FALSE]
   grandmeans <- rowMeans(expr_ref, na.rm = TRUE)
-  grandmeans2 <- rowMeans(expr, na.rm = TRUE)
+  grandmeans2 <- rowMeans(x, na.rm = TRUE)
   
   for (i in unique(batch)) {
     off <- rowMeans(expr_ref[, b_ref == i, drop = FALSE], na.rm = TRUE) - grandmeans
