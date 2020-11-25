@@ -57,7 +57,10 @@ multi.t.test2 <- function(x, pheno, compare = NULL, log10 = FALSE, median.center
       t <- try(t.test(xx[i1], xx[i2], ...), silent = TRUE)
       if (class(t) != "htest")
         return(c(pvalue = NA, mean.diff = NA))
-      c(pvalue = t$p.value, mean.diff = t$estimate[1] - t$estimate[2])
+      if (length(t$estimate) == 1)
+        md <- t$estimate[[1]] else
+          md <- t$estimate[1] - t$estimate[2])
+      c(pvalue = t$p.value, mean.diff = md)
     })
     
     df[[paste("ttest", "pvalue", v[2], v[3], sep = "|")]] <- tv[1, ]
