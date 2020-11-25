@@ -59,7 +59,7 @@ multi.t.test2 <- function(x, pheno, compare = NULL, log10 = FALSE, median.center
         return(c(pvalue = NA, mean.diff = NA))
       if (length(t$estimate) == 1)
         md <- t$estimate[[1]] else
-          md <- t$estimate[1] - t$estimate[2])
+          md <- t$estimate[1] - t$estimate[2]
       c(pvalue = t$p.value, mean.diff = md)
     })
     
