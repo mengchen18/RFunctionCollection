@@ -1,5 +1,6 @@
 multi.t.test2 <- function(x, pheno, compare = NULL, log10 = FALSE, median.center = TRUE, fillNA = TRUE, ...) {
   
+  x.raw <- x
   if (is.null(rownames(x)))
     rownames(x) <- 1:nrow(x)
   
@@ -39,7 +40,7 @@ multi.t.test2 <- function(x, pheno, compare = NULL, log10 = FALSE, median.center
   for ( i in names(tl) ) {
     for ( j in tl[[i]] ) {
       m <- x[, pheno[[i]] == j]
-      rv <- rowSums(!is.na(m))
+      rv <- rowSums(!is.na(x.raw[, pheno[[i]] == j]))
       rm <- rowMeans(m, na.rm = TRUE)
       rq <- rank(rm, na.last = TRUE)/sum(!is.na(rm))
       rq[is.na(rm)] <- NA
