@@ -106,7 +106,7 @@ multi.pca <- function(x, pheno, compare, n = 6) {
   
   t <- lapply(names(compare), function(i, temp_sample, temp_feature) {
     if (i == "_all_") {
-      v <- pca(x, n = n, prefix = "PCA|AllSamples")
+      v <- pca(x, n = n, prefix = "PCA|All")
     } else {
       ph <- pheno[[i]]
       
@@ -135,47 +135,57 @@ multi.pca <- function(x, pheno, compare, n = 6) {
   )
 }
 
-updateDF <- function(x, d) {
-    ii <- intersect(colnames(x), colnames(d))
-    ia <- setdiff(colnames(d), colnames(x))
-    x[, ii] <- d[, ii]
-    x <- cbind(x, d[, ia])
-    x
-  }
-
-###
-phenoFeatureData <- function(
-  object, compare.t.test = NULL, compare.pca = list("_all_" = TRUE),
-  pheno=NULL, log10 = TRUE, median.center = TRUE, fillNA = TRUE, 
-  nf = 6, ...
-) {
+prepViewerData <- function(
+  object, pheno = NULL, log10 = TRUE, median.center = FALSE, fillNA = TRUE,
+  compare.t.test = NULL, compare.pca = list("_all_" = TRUE), nf = 6) {
   
+  # phenotype data
   if (is.null(pheno))
-    pheno <- Biobase::pData(object@featureSet)
-  
-  ts <- multi.t.test2(
-    x = Biobase::exprs(object@featureSet), 
-    compare = compare.t.test, 
-    pheno = pheno,
-    log10 = log10, 
-    median.center = median.center, 
-    fillNA = fillNA, ...)
-  
-  mat <- ts$mat
-  mat.ori <- ts$mat.rawscale
-  ts <- ts$ttest
-  
-  pc <- multi.pca(mat, pheno = pheno, compare = compare.pca, n = nf)
-  fd <- cbind(fData(object@featureSet), pc$features)
-  if (!is.null(ts))
-     fd <- cbind(fd, ts[-1])
-  
-  pd <- cbind(pheno, "n value" = colSums(!is.na(exprs(object@featureSet))), pc$samples)
+    pd <- Biobase::pData(object@featureSet) else
+      pd <- pheno
+    if (!is.null(pd$label))
+      pd$file <- pd$label
+    colnames(pd) <- paste("General|All", colnames(pd), sep = "|")
     
-  pData(object@featureSet) <- updateDF(pData(object@featureSet), pd)
-  fData(object@featureSet) <- updateDF(fData(object@featureSet), fd)
-  object@featureSet@assayData$exprs.normalized <- mat.ori
-  
-  object
+    # feature data
+    fd <- fData(object@featureSet)
+    gac <- c("ID","rtmed","mzmed","annot_ms1", "annot_ms2")
+    ga <- fd[, gac]
+    ea <- fd[, setdiff(colnames(fd), gac)]
+    colnames(ga) <- paste("General|All", colnames(ga), sep = "|")
+    colnames(ea) <- paste("General|Extended", colnames(ea), sep = "|")
+    fdx <- cbind(ga, ea)
+    rownames(fdx) <- rownames(fd)
+    
+    ######## t-test #######
+    ts <- multi.t.test2(
+      x = Biobase::exprs(object@featureSet), 
+      compare = compare.t.test, 
+      pheno = pd,
+      log10 = log10, 
+      median.center = median.center, 
+      fillNA = fillNA)
+    
+    mat <- ts$mat
+    mat.ori <- ts$mat.rawscale
+    ts <- ts$ttest
+    
+    ######## PCA #######
+    pc <- multi.pca(mat, pheno = pd, compare = compare.pca, n = nf)
+    fd <- cbind(fdx, pc$features)
+    if (!is.null(ts))
+      fd <- cbind(fd, ts[-1])
+    
+    pd <- cbind(pd, "Stats|All|n value" = colSums(!is.na(exprs(object@featureSet))), pc$samples)
+    
+    pData(object@featureSet) <- pd
+    fData(object@featureSet) <- fd
+    exprs(object@featureSet) <- mat
+    
+    attr(d, "fx") <- "General|All|rtmed"
+    attr(d, "fy") <- "General|All|mzmed"
+    attr(d, "sx") <- "PCA|AllSample|PC1("
+    attr(d, "sy") <- "PCA|AllSample|PC2("
+    
+    object
 }
-
