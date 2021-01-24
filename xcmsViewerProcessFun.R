@@ -182,10 +182,10 @@ prepViewerData <- function(
     fData(object@featureSet) <- fd
     exprs(object@featureSet) <- mat
     
-    attr(d, "fx") <- "General|All|rtmed"
-    attr(d, "fy") <- "General|All|mzmed"
-    attr(d, "sx") <- "PCA|AllSample|PC1("
-    attr(d, "sy") <- "PCA|AllSample|PC2("
+    attr(object, "fx") <- "General|All|rtmed"
+    attr(object, "fy") <- "General|All|mzmed"
+    attr(object, "sx") <- "PCA|AllSample|PC1("
+    attr(object, "sy") <- "PCA|AllSample|PC2("
     
     object
 }
