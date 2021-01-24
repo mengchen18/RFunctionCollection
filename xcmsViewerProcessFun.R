@@ -43,9 +43,9 @@ multi.t.test2 <- function(x, pheno, compare = NULL, log10 = FALSE, median.center
       rm <- rowMeans(m, na.rm = TRUE)
       rq <- rank(rm, na.last = TRUE)/sum(!is.na(rm))
       rq[is.na(rm)] <- NA
-      df[[paste("mean", j, sep = "|")]] <- rm
-      df[[paste("n value", j, sep = "|")]] <- rv
-      df[[paste("quantile", j, sep = "|")]] <- rq
+      df[[paste("Stats|Mean", j, sep = "|")]] <- rm
+      df[[paste("Stats|N value", j, sep = "|")]] <- rv
+      df[[paste("Stats|Quantile", j, sep = "|")]] <- rq
     }
   }  
   for ( i in 1:nrow(compare) ) {
@@ -63,11 +63,11 @@ multi.t.test2 <- function(x, pheno, compare = NULL, log10 = FALSE, median.center
       c(pvalue = t$p.value, mean.diff = md)
     })
     
-    df[[paste("ttest", "pvalue", v[2], v[3], sep = "|")]] <- tv[1, ]
-    df[[paste("ttest", "log.pvalue", v[2], v[3], sep = "|")]] <- -log10(tv[1, ])
-    df[[paste("ttest", "fdr", v[2], v[3], sep = "|")]] <- p.adjust(tv[1, ], method = "fdr")
-    df[[paste("ttest", "log.fdr", v[2], v[3], sep = "|")]] <- -log10(df[[paste("ttest", "fdr", v[2], v[3], sep = "|")]])
-    df[[paste("ttest", "mean.diff", v[2], v[3], sep = "|")]] <- tv[2, ]
+    df[[paste("ttest", paste(v[2], v[3], sep = "_vs_"), "pvalue", sep = "|")]] <- tv[1, ]
+    df[[paste("ttest", paste(v[2], v[3], sep = "_vs_"), "log.pvalue", sep = "|")]] <- -log10(tv[1, ])
+    df[[paste("ttest", paste(v[2], v[3], sep = "_vs_"), "fdr", sep = "|")]] <- p.adjust(tv[1, ], method = "fdr")
+    df[[paste("ttest", paste(v[2], v[3], sep = "_vs_"), "log.fdr", sep = "|")]] <- -log10(df[[paste("ttest", paste(v[2], v[3], sep = "_vs_"), "fdr", sep = "|")]])
+    df[[paste("ttest", paste(v[2], v[3], sep = "_vs_"), "mean.diff", sep = "|")]] <- tv[2, ]
   }  
   list(ttest = df, mat = x, mat.rawscale = x.ori)
 }
