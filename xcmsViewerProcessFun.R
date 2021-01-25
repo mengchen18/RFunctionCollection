@@ -184,8 +184,8 @@ prepViewerData <- function(
     
     attr(object, "fx") <- "General|All|rtmed"
     attr(object, "fy") <- "General|All|mzmed"
-    attr(object, "sx") <- "PCA|All|PC1("
-    attr(object, "sy") <- "PCA|All|PC2("
+    attr(object, "sx") <- "PCA|All|PC1 ("
+    attr(object, "sy") <- "PCA|All|PC2 ("
     
     object
 }
