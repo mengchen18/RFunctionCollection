@@ -144,8 +144,7 @@ prepViewerData <- function(
     pd <- Biobase::pData(object@featureSet) else
       pd <- pheno
     if (!is.null(pd$label))
-      pd$file <- pd$label
-    colnames(pd) <- paste("General|All", colnames(pd), sep = "|")
+      pd$file <- pd$label   
     
     # feature data
     fd <- fData(object@featureSet)
@@ -176,6 +175,7 @@ prepViewerData <- function(
     if (!is.null(ts))
       fd <- cbind(fd, ts[-1])
     
+    colnames(pd) <- paste("General|All", colnames(pd), sep = "|")
     pd <- cbind(pd, "Stats|All|n value" = colSums(!is.na(exprs(object@featureSet))), pc$samples)
     
     pData(object@featureSet) <- pd
