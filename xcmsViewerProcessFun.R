@@ -1,3 +1,5 @@
+warning("deprecation notice: these functions has been included in the xcmsViewer package, not maintained!")
+
 multi.t.test2 <- function(x, pheno, compare = NULL, log10 = FALSE, median.center = TRUE, fillNA = TRUE, ...) {
   
   x.raw <- x
