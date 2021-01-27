@@ -50,12 +50,13 @@ read.proteinGroups <- function(file) {
   ml
 }
 
-read.proteinGroups.tmt <- function(file) {
+               
+read.proteinGroups.tmt <- function(file, xref=NULL) {
   ab <- read.delim(file, stringsAsFactors = FALSE)
   
   ir <- c(grep("^CON_", ab$Majority.protein.IDs), 
-         grep("^REV_", ab$Majority.protein.IDs), 
-         which(ab$Only.identified.by.site == "+"))
+          grep("^REV_", ab$Majority.protein.IDs), 
+          which(ab$Only.identified.by.site == "+"))
   
   eSum <- c("Fraction", "Reporter.intensity.corrected", "Reporter.intensity", "Reporter.intensity.count")
   ls <- list()
@@ -73,13 +74,32 @@ read.proteinGroups.tmt <- function(file) {
     ab[gb] <- NULL
   }
   
-  lsind$Reporter.intensity.corrected.log2 <- log2(lsind$Reporter.intensity.corrected)
-  lsind$Reporter.intensity.corrected.log2[is.infinite(lsind$Reporter.intensity.corrected.log2)] <- NA
+  lsind$Reporter.intensity.corrected.log10 <- log10(lsind$Reporter.intensity.corrected)
+  lsind$Reporter.intensity.corrected.log10[is.infinite(lsind$Reporter.intensity.corrected.log10)] <- NA
   lsind$annot <- ab[-ir, ]
   lsind$Summed <- ls
   
+  ec <- intersect(eSum, names(lsind))
+  for (i in ec) {
+    nn <- sub(i, "", colnames(lsind[[i]]))
+    nn <- make.names(sub("^.", "", nn))
+    colnames(lsind[[i]]) <- nn
+  }
+  
+  fn <- make.names(xref$label)
+  if (!is.null(xref)) {
+    lab <- make.names(paste(xref$channel, xref$mix))
+    if (!identical(lab, colnames(lsind[[ec[[1]]]])))
+      stop("columne does not match!")
+    for (ii in ec)
+      colnames(lsind[[ii]]) <- fn
+    if (!is.null(lsind$Reporter.intensity.corrected.log10))
+      colnames(lsind$Reporter.intensity.corrected.log10) <- fn
+    lsind$xref <- xref
+  }
   lsind
 }
+
 
 #' Read modificationSpecificPeptides output of maxquant output and split
 #'   it to columns
