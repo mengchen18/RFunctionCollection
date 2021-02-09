@@ -28,7 +28,9 @@ read.proteinGroups <- function(file) {
   annot <- pg[i, -grep(paste(df$val, collapse = "|"), colnames(pg))]
   
   getExpr <- function(x, type = "iBAQ.", log = TRUE, keep.row = NULL) {
-    val <- apply(pg[, grep(type, colnames(x), ignore.case = TRUE)], 2, as.numeric)
+    ic <- grep(type, colnames(x), ignore.case = TRUE, value = TRUE)
+    ic <- setdiff(ic, "iBAQ.peptides")
+    val <- apply(pg[, ic], 2, as.numeric)
     if (log) {
       val <- log10(val)
       val[is.infinite(val)] <- NA
