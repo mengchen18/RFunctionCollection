@@ -43,12 +43,15 @@ read.proteinGroups <- function(file) {
   
   ml <- mapply(function(val, log) getExpr(pg, type = val, log = log, keep.row = i), 
                val = df$val, log = df$log)
-  names(ml) <- gsub("\\.$", "", df$val)
-  
-  if (!is.null(ml$iBAQ))
-    ml$iBAQ_mc <- sweep(ml$iBAQ, 2, matrixStats::colMedians(ml$iBAQ, na.rm = TRUE), "-") + median(ml$iBAQ, na.rm = TRUE)
-  
+  names(ml) <- gsub("\\.$", "", df$val)  
   ml$annot <- annot
+  
+  if (!is.null(ml$iBAQ)) {
+    i <- which(rowSums(ml$iBAQ, na.rm = TRUE) == 0)
+    if (length(i) > 0)
+      ml <- lapply(ml, function(x) x[-i, ])
+    ml$iBAQ_mc <- sweep(ml$iBAQ, 2, matrixStats::colMedians(ml$iBAQ, na.rm = TRUE), "-") + median(ml$iBAQ, na.rm = TRUE) 
+  }  
   ml
 }
 
