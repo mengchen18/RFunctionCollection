@@ -67,7 +67,7 @@ read.proteinGroups.tmt <- function(file, xref=NULL) {
   ls <- list()
   for (i in eSum) {
     gb <- grep(paste0(i, ".[0-9]*$"), colnames(ab), value = TRUE)
-    ls[[i]] <- apply(ab[-ir, gb], 2, as.numeric)
+    ls[[i]] <- apply(ab[-ir, gb, drop = FALSE], 2, as.numeric)
     ab[gb] <- NULL
   }
   
@@ -75,7 +75,7 @@ read.proteinGroups.tmt <- function(file, xref=NULL) {
   eInd <- c("Reporter.intensity.corrected", "Reporter.intensity.count", "Reporter.intensity")
   for (i in eInd) {
     gb <- grep(i, colnames(ab), value = TRUE)
-    lsind[[i]] <- apply(ab[-ir, gb], 2, as.numeric)
+    lsind[[i]] <- apply(ab[-ir, gb, drop = FALSE], 2, as.numeric)
     ab[gb] <- NULL
   }
   
