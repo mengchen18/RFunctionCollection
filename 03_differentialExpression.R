@@ -51,7 +51,10 @@ limmaAddMod <- function(x, mainFactor, sideFactor=NULL, impute=FALSE, imputeMin=
   # dimension, etc
   
   # creating design matrix
-  df <- data.frame(mainFactor, sideFactor)
+  # df <- data.frame(mainFactor, sideFactor)
+  df <- data.frame(mainFactor)
+  if (!is.null(sideFactor))
+    df$sf <- sideFactor
   df[1:length(df)] <- lapply(df, as.factor)
   design <- model.matrix(~ ., df)
   
