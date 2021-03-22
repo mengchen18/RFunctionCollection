@@ -48,3 +48,16 @@ normalize.softQuantile <- function(x, probs = 0.5, sharedProtein = FALSE, ref = 
   }
   x
 }
+
+
+## centering columns
+removeVarQC <- function(x, ref, ...) {
+  x <- normalize.softQuantile(x, ...)
+  x0 <- x[, ref]
+  decomp0 <- svd(x0)
+  m0 <- decomp0$u %*% t(t(x) %*% decomp0$u)
+  mm <- x - m0
+  mm <- mm - rowMedians(mm)
+  mm + rowMedians(x)
+}
+
