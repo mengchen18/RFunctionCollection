@@ -17,7 +17,8 @@ plotQC <- function(x, group, labelPCA = FALSE, fillNA = TRUE, checkPC = 1:2, typ
   idna <- idmat
   idna[idna == 0] <- NA
   shareid <- colSums(!is.na(rowCumsums(idna)))
-  on.exit(par( par(no.readonly = TRUE) ))
+  op <-  par(no.readonly = TRUE)
+  on.exit(par(op))
   
   par(xpd = T, mar = par()$mar + c(0,0,0,7))
   bp <- barplot(colSums(idmat, na.rm = TRUE), col = pal[as.character(group)], 
