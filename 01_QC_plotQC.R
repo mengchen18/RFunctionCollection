@@ -17,14 +17,17 @@ plotQC <- function(x, group, labelPCA = FALSE, fillNA = TRUE, checkPC = 1:2, typ
   idna <- idmat
   idna[idna == 0] <- NA
   shareid <- colSums(!is.na(rowCumsums(idna)))
+  on.exit(par( par(no.readonly = TRUE) ))
   
+  par(xpd = T, mar = par()$mar + c(0,0,0,7))
   bp <- barplot(colSums(idmat, na.rm = TRUE), col = pal[as.character(group)], 
                 las = 2, ylim = ceiling(c(0, nrow(emat)*1.05)), ylab = sprintf("# %s IDs", type))
   lines(bp, colSums(rowCumsums(idmat) > 0), col = 1)
   points(bp, colSums(rowCumsums(idmat) > 0), col = 1, pch = 19)
   lines(bp, shareid, col = 1, lty = 2)
   points(bp, shareid, col = 1, pch = 15)
-  legend("topleft", col = pal, pch = 15, legend = levels(group), bty = "n", pt.cex = 2)
+  # legend("topleft", col = pal, pch = 15, legend = levels(group), bty = "n", pt.cex = 2)
+  legend("bottomright", col = pal, pch = 15,inset=c(-0.4,0), xpd=TRUE, legend = levels(group), bty = "n", pt.cex = 2, , title="Group")
   
   # boxplot
   logemat <- emat
