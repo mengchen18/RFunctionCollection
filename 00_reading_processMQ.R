@@ -144,3 +144,24 @@ read.modSepPep <- function(file, modifications = "Phospho \\(STY\\)") {
   ml
 }
 
+
+#' @importFrom fastmatch 
+annotateModSpePep <- function( file_evidence, file_modSpePep, mod_pattern = "Phospho") {
+  evi <- read.delim(file_evidence, stringsAsFactors = FALSE)
+  evi$id <- as.character(evi$id)
+  modpep <- read.delim(file_modSpePep, stringsAsFactors = FALSE)
+  table(modpep$Modifications)
+  ir <- grep(mod_pattern, modpep$Modifications)
+  modpep <- modpep[ir, ]
+  eids <- modpep$Evidence.IDs
+  eids <- strsplit(eids, ";")
+  site <- sapply(eids, function(id1) {
+    modseq <- unique(evi$Modified.sequence[fmatch(id1, evi$id)])
+    c(length(modseq), paste(modseq, collapse = ";"))
+  })
+  site <- as.data.frame(t(site), stringsAsFactors = FALSE)
+  colnames(site) <- c("N_mod_pep", "mod_pep")
+  site$N_mod_pep <- as.integer(site$N_mod_pep)
+  cbind(modpep, site)
+}
+               
