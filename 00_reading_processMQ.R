@@ -119,7 +119,7 @@ read.modSepPep <- function(file, modifications = "Phospho \\(STY\\)") {
   
   vi <- sapply(df$val, function(x) length(grep(x, colnames(dat))) > 0)
   df <- df[vi, ]             
-  i <- dat$Potential.contaminant != "+" & dat$Reverse != "+" & grepl("Phospho \\(STY\\)", dat$Modifications)
+  i <- dat$Potential.contaminant != "+" & dat$Reverse != "+" & grepl(modifications, dat$Modifications)
   
   annot <- dat[i, -grep(paste(df$val, collapse = "|"), colnames(dat))]
   nn <- grep("Intensity.", colnames(dat))
