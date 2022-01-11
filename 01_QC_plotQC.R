@@ -47,8 +47,14 @@ plotQC <- function(x, group, labelPCA = FALSE, fillNA = TRUE, checkPC = 1:2, typ
        xlab = paste0("PC", checkPC[1], " (", vars[checkPC[1]]*100, "%)"),
        ylab = paste0("PC", checkPC[2], " (", vars[checkPC[2]]*100, "%)")
   )
-  if (labelPCA)
-    text(pc$x[, checkPC], labels = as.character(group))
+  
+  if (is.logical(labelPCA[1])) {
+    if (labelPCA)
+      text(pc$x[, checkPC], labels = as.character(group))
+  } else if (length(labelPCA) == nrow(pc$x)) {
+    text(pc$x[, checkPC], labels = as.character(labelPCA))
+  } else 
+    warning("label issue!!")
   
   list(ID = shareid, 
        pc = pc$x,
