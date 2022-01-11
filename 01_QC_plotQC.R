@@ -28,7 +28,7 @@ plotQC <- function(x, group, labelPCA = FALSE, fillNA = TRUE, checkPC = 1:2, typ
   lines(bp, shareid, col = 1, lty = 2)
   points(bp, shareid, col = 1, pch = 15)
   # legend("topleft", col = pal, pch = 15, legend = levels(group), bty = "n", pt.cex = 2)
-  legend(x = 1.1*max(bp), y = max(shareid), col = pal, pch = 15,inset=c(-0.4,0), xpd=TRUE, legend = levels(group), bty = "n", pt.cex = 2, , title="Group")
+  legend(x = 1.1*max(bp), y = nrow(emat)*1.05, col = pal, pch = 15,inset=c(-0.4,0), xpd=TRUE, legend = levels(group), bty = "n", pt.cex = 2, , title="Group")
   
   # boxplot
   logemat <- emat
